@@ -5,7 +5,7 @@ import trafficLightRequestCrossingStateDiagramExtract from "./assets/part4/traff
 import fooOrBarTypeNarrowingIfExample from "./assets/part4/foo-or-bar-type-narrowing-if-example.png";
 import fooOrBarTypeNarrowingSwitchExample from "./assets/part4/foo-or-bar-type-narrowing-switch-example.png";
 import assertCannotReach from "./assets/part4/assert-cannot-reach.png";
-import crossingControlComponent from "./assets/part4/crossing-control-component.png"
+import CrossingControlBoxComponent from "./assets/part4/crossing-control-component.png"
 
 import trafficLightRequestCrossingStateDiagram from "./assets/part4/traffic-light-request-crossing-state-diagram.svg"
 import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-type-narrowing.png"
@@ -27,28 +27,28 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   
   <ul>
     <li><b>TrafficLightRequestCrossingComponent</b>: An updated <code>TrafficLightSimpleComponent</code> with additional functionality to handle sequencing of the pedestrian crossing procedure.</li>
-    <li><b>CrossingControlComponent</b>: A new <code>FsmRxComponent</code> that consists of a request crossing button, a light that indicates that this request has been received and a display that indicates when it is safe to cross. </li>
-    <li><b>RequestCrossingAssemblyComponent</b>: A standard Angular component that facilitates communication between the <b>CrossingControlComponent</b> and the <b>TrafficLightRequestCrossingComponent</b></li>
+    <li><b>CrossingControlBoxComponent</b>: A new <code>FsmRxComponent</code> that consists of a request crossing button, a light that indicates that this request has been received and a display that indicates when it is safe to cross.</li>
+    <li><b>RequestCrossingAssemblyComponent</b>: A standard <b>Angular</b> component that facilitates communication between the <b>CrossingControlBoxComponent</b> and the <b>TrafficLightRequestCrossingComponent.</b></li>
   </ul>
 
-  <p><i>Note: In a real-world scenario there would also be a pedestrian crossing light situated across the road, however, this is outside the scope of this example.</i></p> 
+  <p><i>Note: In a real-world scenario there would also be a pedestrian crossing light situated across the road. However, this is outside the scope of this example.</i></p> 
 
-  <p>This system follows the controller-delegate pattern where the <b>TrafficLightRequestCrossingComponent</b>(controller) manages the state of the <b>CrossingControlComponent</b>(delegate) duriung the pedestrian crossing procedure.</p>
+  <p>This system follows the controller-delegate pattern where the <b>TrafficLightRequestCrossingComponent</b>(controller) manages the state of the <b>CrossingControlBoxComponent</b>(delegate) during the pedestrian crossing procedure.</p>
 
   <div class="breakout-box examples">
     <p>The complete code for the following ["Traffic Light Request Crossing"](?path=/story/examples-4-traffic-light-request-crossing--default) <br/> example story can be found in the folder <br/><b>"/projects/examples/src/stories/traffic-light-request-crossing"</b>.</p>
   </div>
 
-  <h3>How this Pedestrian Control Box Functions</h3>
+  <h3>How this Pedestrian Control Box functions</h3>
 
   <p>The crossing control box allows pedestrians to request the ability to safely cross the road via the following process:</p>
 
   <ol>
-    <li>When a pedestrian presses the button on the control box it signals the traffic light to initiate the pedestrian crossing procedure during the next <b>"stop</b> state. 
-    This also causes the control box to disable this button and turn on the request crossing indicator light.</li>
-    <li>Once the traffic light turns red, it sends a signal to the control box that it is now safe for the pedestrian to cross the road, prompting it to illuminate its <b>"walk"</b> light and to turn off its request indicator light.</li>
-    <li>After a predetermined duration set by the traffic light, another signal is sent to the control box. 
-    This signal informs the control box that it is time for the pedestrians to complete their crossing, which is communicated by the flashing of the <b>"walk"</b> light. During this step, the request button is also re-enabled.</li>
+    <li>When a pedestrian presses the button on the control box it signals to the traffic light to initiate its pedestrian crossing procedure during the next <b>"stop</b> state. 
+    The control box also disables this button and turns on the request crossing indicator light.</li>
+    <li>Once the traffic light turns red, it sends a signal to the control box that it is now safe for the pedestrian to cross the road, prompting it to illuminate its <b>"walk"</b> light.</li>
+    <li>After a predetermined duration, set by the traffic light, another signal is sent to the control box. 
+    This signal informs the control box that it is time for the pedestrians to complete their crossing, which is communicated by the flashing of the <b>"walk"</b> light. During this step, the request indicator light is also turned off and the button re-enabled. </li>
     <li>Following a second interval the Traffic Light sends a final signal to the control box signifying the conclusion of the walking procedure. This prompts the control box to revert to its initial state. </li>
   </ol>
 
@@ -89,14 +89,14 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <figure>
     <div>
-      <img src={crossingControlComponent} alt=" Crossing Control Component and State Diagram." style={{ paddingBottom: '60px' }} />
-      <figcaption>The rendered CrossingControlComponent and its state diagram.</figcaption>
+      <img src={CrossingControlBoxComponent} alt=" Crossing Control Component and State Diagram." style={{ paddingBottom: '60px' }} />
+      <figcaption>The rendered CrossingControlBoxComponent and its state diagram.</figcaption>
     </div>
   </figure>
 
   <h3>The State Data</h3>
 
-  <p>From the specification of the crossing control box component the following four necessary variables can be identified.</p>
+  <p>From the specification of the crossing control box component the following three necessary variables can be identified.</p>
   
   <ul>
     <li><code>isWalkLightOn</code>: A boolean indicating the status of the walk light.</li>
@@ -108,8 +108,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <ol>
     <li>Certain states impose specific values for the boolean properties <code>isWalkLightOn</code> and <code>isWalkRequestIndicatorOn</code>. 
-    In the <b>"doNotWalk"</b> state, the walk light should never be on, whereas in the <b>"startWalking"</b> state, the walk light must be on and the request indicator off.</li>
-    <li>The property <code>flashInterval</code> and is relevant solely to the <b>"finishWalking"</b> state, so to avoid confusion should not be included in the other states.</li>  
+    In the <b>"doNotWalk"</b> state, the walk light should never be on, whereas in the <b>"startWalking"</b> state, both the walk light and request indicator must be on.</li>
+    <li>The property <code>flashInterval</code> is relevant solely to the <b>"finishWalking"</b> state, so to avoid confusion should not be included in the other states.</li>  
   </ol>
 
   <p>This scenario, where different states have unique data requirements, is common when designing FSMs and often solved with the use of discriminated unions. 
@@ -130,7 +130,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     <p> Type narrowing also works within switch statements, where it accumulatively refines the type of the variable being switched on to remove already checked types. 
     When a case clause is defined for each possible value type it is known as an exhaustive switch.</p> 
      
-    <p>If a default clause is used on an exhaustive switch then the variable being switched on will be typed as a <code>"never"</code> inside this clause. This is a special type that represents an impossible type value and
+    <p>If a default clause is used on an exhaustive switch then the variable being switched on will be typed as a <code>never</code> inside this clause. This is a special type that represents an impossible type value and
     occurs because the default clause of an exhaustive switch is unreachable.</p>
 
     <figure>
@@ -142,8 +142,9 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
     <p>The behavior of the default clause in an exhaustive switch statement can be used to further enhance the type safety.
     <b>FsmRx</b> implements a function called <code>assertCannotReach</code> which takes in a single parameter of type <code>never</code> . 
-    This function is not never executed, and will throw an error if it is, but instead highlights regression errors in the code when changes erroneously allow unreachable code to be reachable.
-    If a third type called <code>"baz"</code> were added to the state union without updating the switch statement, the following error would occur:</p> 
+    This function is not expected to be executed, and will throw an error if it is, but instead highlights regression errors in the code when changes erroneously allow unreachable code to be reachable.</p>
+
+    <p>For example, if a third type called <code>"baz"</code> were added to the state union without updating the switch statement, the following error would occur:</p> 
 
     <figure>
       <div>
@@ -224,7 +225,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   </div>
 
-  <p>Discriminated unions are used to define different <code>stateData</code> variants for each of the states, as well as a default variant they all inherit from, in the following example:</p>
+  <p>Discriminated unions are used to define different <code>stateData</code> variants for each of the states, as well as a default variant they all inherit from. 
+  This can be seen in the following example:</p>
     
   ```ts
 
@@ -257,16 +259,16 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   type CrossingControlBoxData = DoNotWalkCrossingControlBoxData | StartWalkingCrossingControlBoxData | FinishWalkingCrossingControlBoxData;
 
   ```
-  <p>It is not strictly necessary for the base variant to extend <code>BaseStateData</code> however doing so provides added clarity and consistency.
+  <p>It is not strictly necessary for the base variant to extend <code>BaseStateData</code>, but doing so provides added clarity and consistency.
   However, when defining state data each state must be explicitly defined. 
   Defining a handful of states and expecting a base variant, even one that extends <code>BaseStateData</code>, to be used as a default fallback is not supported. 
-  Including a base state in the discriminated union will break <b>TypeScripts</b> ability to perform type narrowing, as it will be unable to narrow beyond the base variant.</p> 
+  Including a base variant in the discriminated union will break <b>TypeScripts</b> ability to perform type narrowing, as it will be unable to narrow beyond this base variant.</p> 
 
   <h3>Defining the Inputs and Outputs</h3> 
   
-  <p>As per the requirements, upon pressing the request crossing button the <code>CrossingControlComponent</code> must emit a signal broadcasting that the interaction took place. 
-  It then waits for a series of response signals that dictate the desired state it should transition to.
-  This is achieved through the use of Angular <code>@Input</code> and <code>@Outputs</code> as follows:  </p>
+  <p>As per the requirements, upon pressing the request crossing button the <b>CrossingControlBoxComponent</b> will emit a signal broadcasting that the interaction took place. 
+  It will then wait for a series of response signals that dictate the desired state it should transition to.
+  This is achieved through the use of <b>Angular</b> <code>@Input</code> and <code>@Output</code> decorators as follows:  </p>
 
   ```ts
   @Output() public outputWalkButtonClicked: EventEmitter<UniqueCustomData> = new EventEmitter();
@@ -275,7 +277,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   
   <div className="breakout-box">
     <h3><code>UniqueCustomData</code> and the <code>UniqueDataService</code></h3>
-    <p><code>UniqueDataService</code> is a small helper service used to create Universally Unique Identifiers (UUID) and unique data objects. 
+    <p>The <code>UniqueDataService</code> is a small helper service used to create Universally Unique Identifiers (UUID) and <code>UniqueCustomData</code> objects. 
     It contains two functions:</p>
     <ul>
       <li><code>generateUID</code>: This is a wrapper around crypto.randomUUID. 
@@ -288,15 +290,15 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>Reacting to User Input</h3>
 
-  <p>The <code>CrossingControlComponent</code> contains a button element called <b>walk-button</b> which can be used to initiate the pedestrian crossing procedure. 
-  Angular's binding syntax is employed to invoke the <code>handleWalkButtonClicked</code> event handler upon clicking this <b>walk-button</b>.</p>
+  <p>The <code>CrossingControlBoxComponent</code> contains a button element called <b>walk-button</b> which can be used to initiate the pedestrian crossing procedure. 
+  <b>Angular's</b> binding syntax is employed to invoke the <code>handleWalkButtonClicked</code> event handler upon clicking this <b>walk-button</b>.</p>
   
 
   ```html
   <button class="walk-button" (click)="handleWalkButtonClicked()"> </button>
   ```
 
-  <p>As event handlers execute outside of the <b>FsmRx</b> context and can happen regardless of the current state, the <code>currentState$</code> getter is used to determine the state we are in.</p>
+  <p>As event handlers execute outside of the <b>FsmRx</b> context and can happen regardless of the current state, the <code>currentState$</code> getter is used to determine the FSMs current state.</p>
   <p>This button should only be active during the <b>"doNotWalk"</b> and <b>"finishWalking"</b> states, so a guard clause is implemented to return from the function if it is in any other state.
   Finally <code>updateState</code> is called, setting <code>isWalkRequestIndicatorOn</code> to true.</p>
 
@@ -317,7 +319,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   ```
   <p>While it would be possible to emit the <code>outputWalkButtonClicked</code> event as part of this function, it is best to handle it in the <code>onUpdate</code> function, as this makes the execution order easier to follow.
   This is achieved by defining a function called <code>emitOutputWalkButtonClicked</code> and binding it to the <b>"doNotWalk"</b> and <b>"finishWalking"</b> <code>onUpdate</code> hooks.
-  In this function, the <code>stateData</code> of both the previous and update state information is used to check whether the <code>isWalkRequestIndicatorOn</code> has just been set to true.  
+  In this function, the <code>stateData</code> of both the previous and update state information is used to check whether the <code>isWalkRequestIndicatorOn</code> has just been set to true.
   If it has a <code>UniqueCustomData</code> object is emitted via the <code>outputWalkButtonClicked</code> EventEmitter.</p>
   
   ```ts
@@ -338,16 +340,16 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   
   <h3>Updating the Traffic Light to act as a Controller</h3>
 
-  <p>During the pedestrian crossing procedure it is vital that the states of the <code>CrossingControlComponent</code> and <code>TrafficLightRequestCrossingComponent</code> remain synchronized. 
-  To ensure this happens, the <code>TrafficLightRequestCrossingComponent</code> acts as the "controller" with the responsibility of informing the "delegate" <code>CrossingControlComponent</code> of the state it should be in.
+  <p>During the pedestrian crossing procedure it is vital that the states of the <code>CrossingControlBoxComponent</code> and <code>TrafficLightRequestCrossingComponent</code> remain synchronized. 
+  To ensure this happens, the <code>TrafficLightRequestCrossingComponent</code> acts as the "controller" with the responsibility of informing the "delegate" <code>CrossingControlBoxComponent</code> of the state it should be in.
   This necessitates the addition of two composite states, <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b>, to the <code>TrafficLightRequestCrossingComponent</code> state string union.</p>
 
   ```ts
   type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stop_startWalking" | "stop_finishWalking";
   ```
    
-  <p>These composite states describe both the visual state of the <code>TrafficLightRequestCrossingComponent</code> (<b>"stop"</b>) and the instruction sent to the <code>CrossingControlComponent</code>.
-  Entering <b>"stop_startWalking"</b> emits a signal telling the <code>CrossingControlComponent</code> to enter its <b>"startWalking"</b> state while entering <b>"stop_startWalking"</b> signals <b>"finishWalking"</b> and leaving <b>"stop_startWalking"</b> signals <b>"doNotWalk"</b>.</p>
+  <p>These composite states describe both the visual state of the <code>TrafficLightRequestCrossingComponent</code> (<b>"stop"</b>) and the instruction sent to the <code>CrossingControlBoxComponent</code>.
+  Entering <b>"stop_startWalking"</b> emits a signal telling the <code>CrossingControlBoxComponent</code> to enter its <b>"startWalking"</b> state while entering <b>"stop_startWalking"</b> signals <b>"finishWalking"</b> and leaving <b>"stop_startWalking"</b> signals <b>"doNotWalk"</b>.</p>
 
   ```ts
   protected override stateMap: StateMap<
@@ -379,7 +381,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>Sequencing Events</h3>
 
-  <p>When the <code>CrossingControlComponent</code> emits the <code>outputWalkButtonClicked</code> event, it is first captured by the <code>RequestCrossingAssemblyComponent</code> then passed to the <code>TrafficLightRequestCrossingComponent</code> via its <code>walkButtonEvent</code> <code>@Input</code>.
+  <p>When the <code>CrossingControlBoxComponent</code> emits the <code>outputWalkButtonClicked</code> event, it is first captured by the <code>RequestCrossingAssemblyComponent</code> then passed to the <code>TrafficLightRequestCrossingComponent</code> via its <code>walkButtonEvent</code> <code>@Input</code>.
   As in any other <b>Angular</b> component, <code>@Input</code> properties are processed using the <code>ngOnChanges</code> <b>Angular</b> lifecycle hook. 
   When a <code>walkButtonEvent</code> change is detected, the current state is retrieved from the <code>currentState$</code> observable and updated, using the <code>updateState</code> function, setting the <code>pedestrianCrossingRequested</code> boolean to true.</p>
 
@@ -458,8 +460,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     }
   }
   ```
-  <p>As previously discussed traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <code>TrafficLightRequestCrossingComponent</code> to emit an event triggering the <code>CrossingControlComponent</code> to transition to the supplied state.
-  As with previous events, this <code>outputCrossingControlBoxState</code> emission is first captured by the <code>RequestCrossingAssemblyComponent</code> before being relayed to the <code>CrossingControlComponent</code>. 
+  <p>As previously discussed traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <code>TrafficLightRequestCrossingComponent</code> to emit an event triggering the <code>CrossingControlBoxComponent</code> to transition to the supplied state.
+  As with previous events, this <code>outputCrossingControlBoxState</code> emission is first captured by the <code>RequestCrossingAssemblyComponent</code> before being relayed to the <code>CrossingControlBoxComponent</code>. 
   Here it is assigned to the <code>crossingControlBoxState</code> <code>@Input</code> property and processed by the <code>ngOnChanges</code> function like so:</p>
 
   ```ts
@@ -630,7 +632,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   For this purpose <b>FsmRx</b> includes a <code>nextChangeStateTransition$</code> subject which emits when the state is changed and a <code>destroy$</code> subject which emits when an <b>FsmRx</b> FSM is destroyed. 
   For <code>FsmRxComponents</code> the <code>destroy$</code> subject is triggered automatically via the <code>ngOnDestroy</code> lifecycle hook but requires manual triggering for services and directives.</p>
 
-  <p>The <code>interval</code> that handles the flashing of the crossing indicator light requires unsubscribing on both the destruction of the <code>CrossingControlComponent</code>, using <code>takeUntil(this.destroy$)</code>, and when transitioning to the next state, using <code>takeUntil(this.nextChangeStateTransition$)</code>.</p>
+  <p>The <code>interval</code> that handles the flashing of the crossing indicator light requires unsubscribing on both the destruction of the <code>CrossingControlBoxComponent</code>, using <code>takeUntil(this.destroy$)</code>, and when transitioning to the next state, using <code>takeUntil(this.nextChangeStateTransition$)</code>.</p>
 
   ```ts
   private handleEnterFinishWalking(onEnterStateChanges: OnEnterStateChanges<CrossingControlBoxStates, "finishWalking", CrossingControlBoxData, CrossingControlBoxCanLeaveToMap>): void {

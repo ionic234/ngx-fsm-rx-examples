@@ -22,7 +22,7 @@ interface DoNotWalkCrossingControlBoxData extends BaseCrossingControlBoxData {
 interface StartWalkingCrossingControlBoxData extends BaseCrossingControlBoxData {
     state: "startWalking",
     isWalkLightOn: true,
-    isWalkRequestIndicatorOn: false;
+    isWalkRequestIndicatorOn: true;
 }
 
 interface FinishWalkingCrossingControlBoxData extends BaseCrossingControlBoxData {
@@ -102,7 +102,7 @@ export class CrossingControlBoxComponent extends FsmRxComponent<
                         this.changeState({
                             state: crossingControlBoxState,
                             isWalkLightOn: true,
-                            isWalkRequestIndicatorOn: false
+                            isWalkRequestIndicatorOn: true
                         });
                         break;
                     case "finishWalking":
