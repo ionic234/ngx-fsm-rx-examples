@@ -1,0 +1,21 @@
+<div class="traffic-light-housing"
+    *ngIf="stateData$ | async as stateData">
+    <ul>
+        <li>
+            <span class="red"
+                [ngClass]="{'on':stateData.state === 'stop'  || stateData.state === 'stopWithRightTurn'}"></span>
+        </li>
+        <li>
+            <span class="amber"
+                [ngClass]="{'on':stateData.state === 'prepareToStop'}"></span>
+        </li>
+        <li>
+            <span class="green"
+                [ngClass]="{'on': (stateData.state === 'go')  }"></span>
+        </li>
+    </ul>
+    <div class="right-turn">
+        <span class="green"
+            [ngClass]="{'on':stateData.state === 'stopWithRightTurn' || stateData.state === 'go'}"></span>
+    </div>
+</div>

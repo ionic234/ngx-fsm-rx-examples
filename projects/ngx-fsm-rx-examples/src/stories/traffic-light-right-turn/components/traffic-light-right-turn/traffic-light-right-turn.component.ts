@@ -4,13 +4,13 @@ import { BaseStateData, CurrentStateInfo, FSMInit, OnEnterStateChanges, StateMap
 import { FsmRxComponent } from 'ngx-fsm-rx';
 import { timer } from 'rxjs';
 
-// Define the states the traffic light component can be in 
-type TrafficLightStates = "go" | "prepareToStop" | "stop";
+type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stopWithRightTurn";
 
 type TrafficLightTimings = {
   go: 7000,
   prepareToStop: 3000,
-  stop: 10000;
+  stop: 7000;
+  stopWithRightTurn: 3000,
 };
 
 interface TrafficLightData extends BaseStateData<TrafficLightStates> {
@@ -21,15 +21,16 @@ type TrafficLightCanLeaveToMap = {
   FSMInit: "go",
   go: "prepareToStop",
   prepareToStop: "stop",
-  stop: "go";
+  stop: "stopWithRightTurn";
+  stopWithRightTurn: "go",
 };
 
 @Component({
-  selector: 'lib-traffic-light-simple',
-  templateUrl: './traffic-light-simple.component.html',
-  styleUrls: ['./traffic-light-simple.component.scss']
+  selector: 'lib-traffic-right-turn',
+  templateUrl: './traffic-light-right-turn.component.html',
+  styleUrls: ['./traffic-light-right-turn.component.scss']
 })
-export class TrafficLightSimpleComponent extends FsmRxComponent<
+export class TrafficLightRightTurnComponent extends FsmRxComponent<
   TrafficLightStates,
   TrafficLightData,
   TrafficLightCanLeaveToMap
@@ -41,7 +42,7 @@ export class TrafficLightSimpleComponent extends FsmRxComponent<
     TrafficLightCanLeaveToMap
   > = {
       go: {
-        canEnterFromStates: { FSMInit: true, stop: true },
+        canEnterFromStates: { FSMInit: true, stopWithRightTurn: true },
         canLeaveToStates: { prepareToStop: true },
         onEnter: this.handleEnterState
       },
@@ -52,9 +53,14 @@ export class TrafficLightSimpleComponent extends FsmRxComponent<
       },
       stop: {
         canEnterFromStates: { prepareToStop: true },
+        canLeaveToStates: { stopWithRightTurn: true },
+        onEnter: this.handleEnterState
+      },
+      stopWithRightTurn: {
+        canEnterFromStates: { stop: true },
         canLeaveToStates: { go: true },
         onEnter: this.handleEnterState
-      }
+      },
     };
 
   public constructor() {
@@ -66,7 +72,7 @@ export class TrafficLightSimpleComponent extends FsmRxComponent<
     this.currentState$.subscribe((currentStateInfo: CurrentStateInfo<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) => {
       const { state } = currentStateInfo;
       if (state === "FSMInit") {
-        this.changeState<FSMInit>({ state: "go", trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } });
+        this.changeState<FSMInit>({ state: "go", trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 7000, stopWithRightTurn: 3000 } });
       }
     });
   }

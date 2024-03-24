@@ -1,0 +1,52 @@
+<ng-container *ngIf="stateData$ | async as stateData">
+
+    <ul class="instructions"
+        [ngClass]="{'hidden':stateData.state === 'credentialsAccepted' }">
+        <li>Valid Credentials - Username: admin, password: 12345 </li>
+        <li>Force transition rejection - Username: reject</li>
+        <li>Force error - Username: error</li>
+    </ul>
+
+    <div class="form-holder">
+        <form *ngIf="stateData.state !== 'credentialsAccepted'"
+            (ngSubmit)="submitCredentials()"
+            [formGroup]="loginForm"
+            [ngClass]="{'error' : stateData.state === 'locked' || stateData.state === 'error' }">
+
+            <div *ngIf="stateData.state === 'submittingCredentials'"
+                class="loading"></div>
+            <div *ngIf="stateData.state === 'locked'"
+                class="locked">
+                <p> Your account has been <br>locked for {{stateData.lockedSecondsRemaining}} seconds </p>
+            </div>
+
+            <p>Please enter your username and password:</p>
+
+            <label for="username">username:</label>
+            <input id="username"
+                formControlName="username"
+                type="text" />
+
+            <label for="password">password:</label>
+            <input id="password"
+                formControlName="password"
+                type="password" />
+
+            <div class=form-controls>
+                <p class="error-message"
+                    *ngIf="stateData.state === 'locked' || stateData.state === 'error'">{{stateData.errorMessage}}</p>
+                <input type="submit"
+                    [disabled]="stateData.state !== 'awaitingInput'"
+                    value="submit"
+                    class="login-btn">
+            </div>
+        </form>
+
+        <div class="welcome"
+            *ngIf="stateData.state === 'credentialsAccepted'">
+            <h1>Welcome {{stateData.username}}</h1>
+            <p>Remount the component to start again</p>
+        </div>
+    </div>
+
+</ng-container>

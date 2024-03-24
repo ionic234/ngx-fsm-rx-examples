@@ -1,0 +1,13 @@
+<fsm-rx-debug-set [debugLogKeys]="['state', 'pedestrianCrossingRequested']">
+    <lib-traffic-light-request-crossing #fsmRxComponent
+        [walkButtonEvent]="walkButtonEvent"
+        (outputCrossingControlBoxState)="handleOutputPedestrianCrossingStates($event)"
+        [fsmConfig]="fsmConfig" />
+</fsm-rx-debug-set>
+
+<fsm-rx-debug-set [debugLogKeys]="['state', 'isWalkRequestIndicatorOn', 'isWalkLightOn']">
+    <lib-crossing-control-box #fsmRxComponent
+        (outputWalkButtonClicked)="handleOutputWalkButtonClicked($event)"
+        [crossingControlBoxState]="crossingControlBoxState"
+        [fsmConfig]="fsmConfig" />
+</fsm-rx-debug-set>

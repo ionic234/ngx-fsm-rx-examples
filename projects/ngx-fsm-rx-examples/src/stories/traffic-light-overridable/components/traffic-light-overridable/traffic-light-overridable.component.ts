@@ -1,23 +1,23 @@
 /*eslint-disable*/
-import { AfterViewInit, Component } from '@angular/core';
-import { BaseStateData, CurrentStateInfo, FSMInit, OnEnterStateChanges, StateMap } from 'fsm-rx';
+import type { AfterViewInit } from '@angular/core';
+import { Component } from '@angular/core';
+import type { BaseStateData, OnEnterStateChanges, StateMap } from 'fsm-rx';
 import { FsmRxComponent } from 'ngx-fsm-rx';
-import { timer } from 'rxjs';
 
-// Define the states the traffic light component can be in 
-type TrafficLightStates = "go" | "prepareToStop" | "stop";
+export type TrafficLightStates = "go" | "prepareToStop" | "stop";
 
-type TrafficLightTimings = {
+export type TrafficLightTimings = {
   go: 7000,
   prepareToStop: 3000,
   stop: 10000;
 };
 
-interface TrafficLightData extends BaseStateData<TrafficLightStates> {
+export interface TrafficLightData extends BaseStateData<TrafficLightStates> {
   trafficLightTimings: TrafficLightTimings;
+  stateTimeoutId: number | undefined;
 }
 
-type TrafficLightCanLeaveToMap = {
+export type TrafficLightCanLeaveToMap = {
   FSMInit: "go",
   go: "prepareToStop",
   prepareToStop: "stop",
@@ -25,11 +25,11 @@ type TrafficLightCanLeaveToMap = {
 };
 
 @Component({
-  selector: 'lib-traffic-light-simple',
-  templateUrl: './traffic-light-simple.component.html',
-  styleUrls: ['./traffic-light-simple.component.scss']
+  selector: 'lib-traffic-light-overridable',
+  templateUrl: './traffic-light-overridable.component.html',
+  styleUrls: ['./traffic-light-overridable.component.scss']
 })
-export class TrafficLightSimpleComponent extends FsmRxComponent<
+export class TrafficLightOverridableComponent extends FsmRxComponent<
   TrafficLightStates,
   TrafficLightData,
   TrafficLightCanLeaveToMap
@@ -44,6 +44,7 @@ export class TrafficLightSimpleComponent extends FsmRxComponent<
         canEnterFromStates: { FSMInit: true, stop: true },
         canLeaveToStates: { prepareToStop: true },
         onEnter: this.handleEnterState
+
       },
       prepareToStop: {
         canEnterFromStates: { go: true },
@@ -55,35 +56,35 @@ export class TrafficLightSimpleComponent extends FsmRxComponent<
         canLeaveToStates: { go: true },
         onEnter: this.handleEnterState
       }
+
     };
 
   public constructor() {
-    super();
+    super({ debugLogBufferCount: 10 });
   }
 
   public override ngAfterViewInit(): void {
     super.ngAfterViewInit();
-    this.currentState$.subscribe((currentStateInfo: CurrentStateInfo<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) => {
-      const { state } = currentStateInfo;
-      if (state === "FSMInit") {
-        this.changeState<FSMInit>({ state: "go", trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } });
-      }
-    });
+    if (!this.fsmConfig.stateOverride) {
+      this.changeState({ state: "go", stateTimeoutId: undefined, trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } });
+    }
   }
 
   private handleEnterState(onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>): void {
 
     const { enteringStateInfo } = onEnterStateChanges;
-    const { stateData, state, canLeaveTo } = enteringStateInfo;
-    const { trafficLightTimings } = stateData;
+    const { stateData } = enteringStateInfo;
+    const state = enteringStateInfo.state;
 
-    timer(trafficLightTimings[state])
-      .subscribe(() => {
+    this.updateState({
+      ...stateData,
+      stateTimeoutId: window.setTimeout(() => {
         this.changeState({
           ...stateData,
-          state: canLeaveTo[0]
+          state: enteringStateInfo.canLeaveTo[0],
+          stateTimeoutId: undefined
         });
-      });
+      }, stateData.trafficLightTimings[state])
+    });
   }
-
 }
