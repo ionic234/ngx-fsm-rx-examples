@@ -4,33 +4,29 @@ import trafficLightSimpleStateDiagram from "./assets/part2/traffic-light-simple-
 import trafficLightSimpleGoState from "./assets/part2/traffic-light-simple-go-state.png"
 import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.png";
 
-<Meta title="2. Creating a simple traffic light component with FsmRx" /> 
+<Meta title="2. Creating a Simple Traffic Light component with FsmRx" /> 
 <head>
   <base href="/"/>
 </head>
 <article>
   <h1>Creating Finite State Machines with FsmRx</h1>
   <hr />
-  <h2>Part 2: Creating a simple traffic light component with FsmRx</h2>
+  <h2>Part 2: Creating a Simple Traffic Light component with FsmRx</h2>
   
-  <p>In this article we will learn how to build a simple traffic light component using <b>FsmRx</b>. 
+  <p>In this article we will learn how to build a Simple Traffic Light component using <b>FsmRx</b>. 
   Specifically, we will be using the <b>Angular</b> wrapper <b>NgxFsmRx</b>, which contains the required base functionality to define <b>Angular</b> injectables, services and components.
-  The <b>NgxFsmRx</b> code repository contains two projects, the <b>NgxFsmRx</b> wrapper project and an <b>"Examples"</b> project which contains this documentation and its supporting code examples.</p> 
+  <b>FsmRx</b> can be added to an <b>Angular</b> project of version 16 and above using the following command: </p> 
+
+  ```shell
+  ng add ngx-fsm-rx
+  ``` 
 
   <p><i>Disclaimer: These articles include examples intended to showcase the functionalities of <b>FsmRx</b> rather than accurately depict real-world traffic control systems. 
   The choice of traffic lights as examples is based on their widespread familiarity. 
   Actual traffic control systems are significantly more complex than the simplified illustrations provided in this documentation.</i></p>  
 
   <p>This <b>"Examples"</b> project takes advantage of <b>Storybook</b>, a front-end code playground for previewing and experimenting with front-end components.
-  If you are not reading this documentation via the <b>Storybook</b> playground application It is strongly recommended that you run it using the following commands:</p> 
-
-  ```shell
-  npm install 
-  npm run build
-  npm run storybook 
-  ```
-  
-  <p><b>Storybook</b> provides a web interface where this documentation and the completed example components can be viewed. 
+  <b>Storybook</b> provides a web interface where the completed example components can be viewed. 
   In the vernacular of <b>Storybook</b>, these examples are presented as stories. 
   Stories allow us to set the inputs and default values of an <b>FsmRxComponent</b> through the use of <code>arg</code> controls, facilitating testing, experimentation and prototyping.</p>
 
@@ -327,7 +323,7 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
     <li><code>onLeave</code>: Called first during <code>changeState</code> transitions, this hook is used to handle the teardown operations specific to the state you're leaving. 
     It is where tasks such as cancelling timers, unbinding events, or any other necessary cleanup operations are performed before moving to the next state.</li>
     <li><code>onEnter</code>: This hook is called last during <code>changeState</code> transitions and is used to perform any necessary buildup logic for the state being entered. 
-    This could involve activities like initialising timers, binding events, making API calls, or any other actions needed to prepare the new state for execution.</li>
+    This could involve activities like initialising timers, binding events, making API calls, or any other actions needed to prepare for the new state.</li>
     <li><code>onUpdate</code>: is used to perform any required side effects during <code>updateState</code> transitions such as playing animations, sounds and triggering events.</li>
   </ul>
  
@@ -340,22 +336,20 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
   OnUpdateStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>
   ```
 
-  <p>-------------------------------------- YOU ARE HERE --------------------------------</p>
-
-  <p>These data types contain the hook they relate to and two properties to describe the before and after states of the transition. 
+  <p>These data types contain the hook they relate to and properties to describe the before and after states of the transition. 
   For <code>OnLeaveStateChanges</code> and <code>OnEnterStateChanges</code> these properties are called <code>leavingStateInfo</code> and <code>enteringStateInfo</code> while for <code>OnUpdateStateChanges</code> they are named <code>previousInfo</code> and <code>updateInfo</code>.
   Regardless of name, they each contain the following properties:</p>
 
   <ul>
     <li><b>state</b>: The string literal of the state the info relates to.</li>
-    <li><b>stateData</b>: The data relivant to this state.</li>
+    <li><b>stateData</b>: The data relevant to this state.</li>
     <li><b>canLeaveTo</b>: An array of the states this state can leave to</li>
     <li><b>canUpdate</b>: A boolean value that declares whether the state can be updated or not. This value is always true except for the <b>"FSMInit"</b> state.</li>
   </ul>
 
-  <p>This gives us access to all the data required to control the flow of our FSM.</p>
+  <p>This gives access to all the data required to control the flow of the FSM.</p>
 
-  <p>These lifecycle hooks are specified within our <b>stateMap</b> and can be represented as either an inline function or a method call.</p>
+  <p>These lifecycle hooks are specified within the <b>stateMap</b> and can be represented as either an inline function or method calls.</p>
 
   <h3>Defining an onEnter Hook for the Traffic lights "go" State</h3>
 
@@ -378,8 +372,8 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
     };
   ```
 
-  <p>The duration to wait in this state can be determined by consulting the <b>trafficLightTiming"</b> property of the state data. 
-  As previously mentioned, this data can be retrieved from the <b>OnEnterStateChanges</b> argument either directly or via object destructuring</p> 
+  <p>The duration to wait in this state can be determined by consulting the <code>trafficLightTiming</code> property of the state data. 
+  As previously mentioned, this data can be retrieved from the <code>OnEnterStateChanges</code> argument either directly or via object destructuring:</p> 
   ```ts
   onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
     const trafficLightTimings = onEnterStateChanges.enteringStateInfo.stateData.trafficLightTimings
@@ -397,9 +391,9 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
 
   <p>This <b>"go"</b> state timing data is supplied to the <b>RxJS</b> <code>timer</code> function.
   This function returns an observable that waits for the specified period before emitting and completing. 
-  Subscribing to this emission allows the <b>changeState</b> function to be called, advancing to the "prepareToStop" state after the specified delay.
-  Given that all states share identical data, the spread operator can be used to supply this function with the current <b>stateData</b>, altering only the state property to reflect the desired next state.
-  As the timer observable automatically completes after emitting, there is no need for an <b>onLeave</b> cleanup function to handle unsubscribing or any other cleanup operations.</p>
+  Subscribing to this emission allows the <code>changeState</code> function to be called, advancing to the <b>"prepareToStop"</b> state after the specified delay.
+  Given that all states share identical data, the spread operator can be used to supply this function with the current <code>stateData</code>, altering only the state property to reflect the desired next state.
+  As the timer observable automatically completes after emitting, there is no need for an <code>onLeave</code> cleanup function to handle unsubscribing or any other cleanup operations.</p>
 
   ```typescript
   onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
@@ -417,19 +411,19 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
   }
   ```
 
-  <h3>Finializing the Simple Traffic Light Component</h3>
+  <h3>Finalising the Simple Traffic Light component</h3>
 
   <p>Finally all that is required to complete the traffic light component is to write the hook logic for the other two states.
   While it would be possible to create a change state function for each required state, this would be quite redundant as each state performs the exact same steps. 
   They are:</p>
   
   <ol>
-    <li>Extract the current state duration from the <code>TrafficLightTimings</code> property</li>
-    <li>Create a timer to wait for this duration</li>
+    <li>Extract the current state duration from the <code>TrafficLightTimings</code> property.</li>
+    <li>Create a timer to wait for this duration.</li>
     <li>Transition to the next state in the chain.</li>
   </ol>
 
-  <p>This can be achieved by updating the code to use a method call, rather than an inline function, and applying it to all of the states <b>OnEnter</b> hooks.
+  <p>This can be achieved by updating the code to use a method call, rather than an inline function, and applying it to all of the states <code>OnEnter</code> hooks.
   For this purpose, the <code>OnEnterStateChanges</code> type accepts a union of states as its second type parameter allowing it to represent multiple types of state data.</p> 
   
   ```typescript
@@ -459,9 +453,11 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
     }
 
   ```
-  <p>To successfully transition to the next state, we require two pieces of data: the current state we're in and our intended next state destination.
-  The <code>enteringStateInfo</code> contains the properties <code>state</code> and <code>canLeaveTo</code>, which are the name of our impending new state and an array containing all of its possible future state transitions.
-  As each state can only exit to one other state we can access the first entry in this array to get the name of our destination state.</p>
+  <p>To successfully transition to the next state, two pieces of data are required: the current state and the intended next state.
+  The <code>enteringStateInfo</code> contains the properties: <code>state</code>, representing the name of the upcoming new state, and
+  <code>canLeaveTo</code>, an array containing all the states to which a future transition is possible.</p>
+
+  <p>As each of the Simple Traffic Lights states can only exit to one other state, the first entry in the <code>canLeaveTo</code> array is the name of the destination state.</p>
 
   ```typescript
   private handleEnterState(
@@ -496,11 +492,11 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
   ng g ngx-fsm-rx:s
   ```
   
-  <p>Both schematics guide you through the process of defining states, transition rules and lifecycle hooks, while also generating the necessary class, template and story files.</p> 
+  <p>Both schematics guide through the process of defining states, transition rules and lifecycle hooks, while also generating the necessary class, template and story files.</p> 
   
   <hr/>
 
-  <p>With this Simple Traffic Light Component complete, you should have a good grasp of how to set up a basic FSM using FsmRx. 
+  <p>With this Simple Traffic Light component complete, you should have a good grasp of how to set up a basic FSM using FsmRx. 
   In ["Part 3 Modifying an existing FSM"](?path=/docs/3-modifying-an-existing-fsm--docs) we examine a key benefit of the module approach utilized in FSMs by adding a fourth state, demonstrating how easy FSMs are to update, restructure and maintain.</p>
 
 </article>

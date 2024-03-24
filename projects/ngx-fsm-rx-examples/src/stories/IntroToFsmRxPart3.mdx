@@ -15,11 +15,11 @@ import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-
 
   <p>We've all been there, after days of hard work we finally have the requested functionality finished and working to specifications when the stakeholder turns around and says "Can we just add this one little feature?".
   Through gritted teeth we answer "Of course", knowing full well this "little" feature will mean countless hours of rewriting and retesting. 
-  However the dreaded specter of "feature creep" becomes a lot less daunting when using FSMs.</p>
+  However the dreaded spectre of "feature creep" becomes a lot less daunting when using FSMs.</p>
 
-  <p>One of the key benefits of FSMs is their compartmentalised structure of module-like states with strictly defined transitions, which make adding, removing and reordering functionality simple. 
-  In this example, we imagine a scenario where we are given the last-minute requirement of adding a right turn light into our Simple Traffic Light Component.
-  Management would like this right green arrow to be on for the last 3 seconds of the <b>"stop"</b> light and for all of the <b>"go"</b> light. </p> 
+  <p>FSMs compartmentalised structure of module-like states with strictly defined transitions, make adding, removing and reordering functionality simple. 
+  This example imagines a scenario where, at the last minute, a right turn is added to the requirements of the Simple Traffic Light Component. 
+  Management would like this to be a right green arrow that is on for the last 3 seconds of the <b>"stop"</b> state and for all of the <b>"go"</b> state. </p> 
 
   <div class="breakout-box examples">
     <p>The complete code for the following ["Traffic Light Right Turn"](?path=/story/examples-2-traffic-light-right-turn--default) <br/> example story can be found in the folder <br/><b>"/projects/examples/src/stories/traffic-light-right-turn"</b>.</p>
@@ -27,21 +27,21 @@ import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-
 
   <h3>Adding a New State</h3>
 
-  <p>By analyzing the requirements we can identify three changes that need to be made.</p>
+  <p>By analysing the requirements, the following three changes can be identified:</p>
   
   <ol>
-    <li>Create a new state where both the stop and the right turn signals are active at the same time which lasts for three seconds, called <b>"stopWithRightTurn"</b>.</li>
-    <li>Reduce the duration of the stop state by three seconds to account for the time spent in the new <b>"stopWithRightTurn"</b>.</li>
-    <li>Update the <b>HTML</b> template to contain this new signal light element and update the <code>ngClass</code> conditions to ensure the correct lights are active during each state</li> 
+    <li>Create a new state where both the stop and the right turn signals are active at the same time, lasting for three seconds, called <b>"stopWithRightTurn"</b>.</li>
+    <li>Reduce the duration of the stop state by three seconds to account for the time spent in the new <b>"stopWithRightTurn"</b> state.</li>
+    <li>Update the <b>HTML</b> template to contain this new signal light element and update the <code>ngClass</code> conditions to ensure the correct lights are active during each state.</li> 
   </ol>
 
-  <p>To set up the new state first it required adding to the Traffic Lights state string union:</p>
+  <p>To set up the new state it must first be added to the the Traffic Lights state string union:</p> 
   
   ```typescript
   type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stopWithRightTurn";
   ```
   
-  <p>Next the <b>"stopWithRightTurn"</b> is added to the <b>TrafficLightCanLeaveToMap</b> with the <b>"stop"</b> state updated to transition to the new <b>"stopWithRightTurn"</b> state which in turn is set to transition to the <b>"go"</b> state.</p>
+  <p>Next the <b>"stopWithRightTurn"</b> is added to the <code>TrafficLightCanLeaveToMap</code> with the <b>"stop"</b> state updated to transition to the new <b>"stopWithRightTurn"</b> state, which in turn is set to transition to the <b>"go"</b> state.</p>
  
   ```ts
   type TrafficLightCanLeaveToMap = {
@@ -96,13 +96,13 @@ import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-
 
 
   <p>As evident in the previous example the use of defined transitions makes altering program flow much easier. No longer is it necessary to hunt through the code to make these changes. 
-  What's more, if the <code>changeState</code> and <code>updateState</code> function calls are typed to the expected current state, changes to the <code>CanLeaveToMap</code> that invalidate these calls will be highlighted in the IDE, making even complex code simple to maintain.</p>
+  What's more, if the <code>changeState</code> and <code>updateState</code> function calls are typed to the expected current state, changes to the <code>CanLeaveToMap</code> that invalidate these calls will be highlighted in the <b>IDE</b>, making even complex code simple to maintain.</p>
 
   <h3>Updating the Data</h3>
 
-  <p><b>FsmRx</b> also makes opdating data easy.   
-  For this simple traffic light Component all that is required to update the data to support the new <b>"stopWithRightTurn"</b> state is to add it to the <code>TrafficLightTimings</code> object,
-  tweak the values to the required durations and update these values in the initial changeState function call in the <code>"ngAfterViewInit"</code> function.</p>
+  <p><b>FsmRx</b> also makes updating data easy.
+  For this Simple Traffic Light component all that is required to update the data to support the new <b>"stopWithRightTurn"</b> state is to add it to the <code>TrafficLightTimings</code> object,
+  tweak the values to the required durations and update these values in the initial changeState function call in the <code>ngAfterViewInit</code> function.</p>
 
   ```ts
   type TrafficLightTimings = {
@@ -125,13 +125,13 @@ import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-
   
   <h3>Updating the Template</h3>
 
-  <p>The first step in adding the right turn arrow to the template is to create an <b>HTML</b> element to hold the right turn arrow. 
+  <p>The first step in adding the right turn arrow to the template is to create a <b>HTML</b> element to hold the right turn arrow. 
   As this element needs to sit at the bottom right of the existing traffic light <b>absolute positioning</b> is used to place it where it is needed.</p>
   
   <p>In the updated specs the red and right-turn lights need to be active for multiple states. 
   In the case of the red light, it is needed for both the <b>"stop"</b> and <b>"stopWithRightTurn"</b> states, while the new right-turn light is required to be on during both the <b>"stopWithRightTurn"</b> and <b>"go"</b> states.
-  In angular the <code>ngClass</code> directive supports compound conditionals so we can easily add this functionality to the relevant <code>ngClass</code> expressions using the <code>||</code>(or) operator.</p>
-
+  In <b>Angular</b> the <code>ngClass</code> directive supports compound conditionals, allowing the <code>||</code>(or) operator to be used to add the required clauses to the relevant expressions.</p>
+  
   ```typescript
   <div class="traffic-light-housing"
     *ngIf="stateData$ | async as stateData">
@@ -167,8 +167,8 @@ import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-
 
 
 <hr/>
-<p>So far we have created and updated FSMs that work as closed systems. However, real work applications don't exist in a vacuum. 
-In ["Part 4: Reacting to user input"](?path=/docs/4-reacting-to-user-input--docs) we will explore how FsmRx handles user interactions by adding a pedestrian crossing button to our traffic light component.</p>
+<p>So far we have created and updated FSMs that work as closed systems. However, real world applications don't exist in a vacuum. 
+In ["Part 4: Reacting to user input"](?path=/docs/4-reacting-to-user-input--docs) we will explore how <b>FsmRx</b> handles user interactions by adding a pedestrian crossing button to the traffic light component.</p>
 </article>
 
 <style>
