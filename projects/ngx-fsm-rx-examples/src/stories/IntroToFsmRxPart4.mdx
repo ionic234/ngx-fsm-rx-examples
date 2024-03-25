@@ -36,7 +36,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <p>This system follows the controller-delegate pattern where the <b>TrafficLightRequestCrossingComponent</b>(controller) manages the state of the <b>CrossingControlBoxComponent</b>(delegate) during the pedestrian crossing procedure.</p>
 
   <div class="breakout-box examples">
-    <p>The complete code for the following ["Traffic Light Request Crossing"](?path=/story/examples-4-traffic-light-request-crossing--default) <br/> example story can be found in the folder <br/><b>"/projects/examples/src/stories/traffic-light-request-crossing"</b>.</p>
+    <p>The complete code for the following ["Traffic Light Request Crossing"](?path=/story/examples-4-traffic-light-request-crossing--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-request-crossing"</b>.</p>
   </div>
 
   <h3>How this Pedestrian Control Box functions</h3>
@@ -341,15 +341,21 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <h3>Updating the Traffic Light to act as a Controller</h3>
 
   <p>During the pedestrian crossing procedure it is vital that the states of the <code>CrossingControlBoxComponent</code> and <code>TrafficLightRequestCrossingComponent</code> remain synchronized. 
-  To ensure this happens, the <code>TrafficLightRequestCrossingComponent</code> acts as the "controller" with the responsibility of informing the "delegate" <code>CrossingControlBoxComponent</code> of the state it should be in.
-  This necessitates the addition of two composite states, <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b>, to the <code>TrafficLightRequestCrossingComponent</code> state string union.</p>
+  To ensure this happens, the <code>TrafficLightRequestCrossingComponent</code> acts as the controller with the responsibility of informing the delegate <code>CrossingControlBoxComponent</code> of the state it should be in.
+  This necessitates the addition of two composite states <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> to the <code>TrafficLightRequestCrossingComponent</code> state string union.</p>
 
   ```ts
   type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stop_startWalking" | "stop_finishWalking";
   ```
    
-  <p>These composite states describe both the visual state of the <code>TrafficLightRequestCrossingComponent</code> (<b>"stop"</b>) and the instruction sent to the <code>CrossingControlBoxComponent</code>.
-  Entering <b>"stop_startWalking"</b> emits a signal telling the <code>CrossingControlBoxComponent</code> to enter its <b>"startWalking"</b> state while entering <b>"stop_startWalking"</b> signals <b>"finishWalking"</b> and leaving <b>"stop_startWalking"</b> signals <b>"doNotWalk"</b>.</p>
+  <p>These composite states describe both the visual state of the <code>TrafficLightRequestCrossingComponent</code> (<b>"stop"</b>) and the instruction sent to the <code>CrossingControlBoxComponent</code>(<b>"startWalking"</b> / <b>"finishWalking"</b>) as follows:</p>
+  <ul>
+    <li>Entering the <b>"stop_startWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"startWalking"</b> state.</li>
+    <li>Entering the <b>"stop_finishWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"finishWalking"</b> state.</li>
+    <li>Leaving the <b>"stop_finishWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"doNotWalk"</b> state.</li>
+  </ul>
+
+  <p>This is demonstrated in the following code:</p>
 
   ```ts
   protected override stateMap: StateMap<
@@ -377,7 +383,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     },
   };
   ```
-  <p><i>Note: While <b>FsmRx</b> contains no formal method for defining composite states, in the following example a hyphen is used to indicate the hierarchical relationships between containing states and their substates.</i></p>
+  <p><i>Note: While <b>FsmRx</b> contains no formal method for defining composite states, in the previous example a hyphen is used to indicate the hierarchical relationships between containing states and their substates.</i></p>
 
   <h3>Sequencing Events</h3>
 
@@ -401,8 +407,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     }
   }
   ```
-  <p><i><b>FsmRxComponents</b> implement their own <code>ngOnChanges</code> function for handling <code>fsmConfig</code> changes (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)).
-  When implementing custom <code>ngOnChanges</code> logic it is necessary to override this function and immediately call <code>super.ngOnChanges(changes)</code> to ensure default functionality is preserved.</i></p>
+  <p><b>FsmRxComponents</b> implement their own <code>ngOnChanges</code> function for handling <code>fsmConfig</code> changes (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)).
+  When implementing custom <code>ngOnChanges</code> logic it is necessary to override this function and immediately call <code>super.ngOnChanges(changes)</code> to ensure default functionality is preserved.</p>
 
 
   <p>The <code>TrafficLightRequestCrossingComponent</code> schedules all state transitons using a function called <code>delayToStateChange</code>.
@@ -440,7 +446,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     </div>
   </figure>
   
-  <p>Eventhough the <code>pedestrianCrossingRequested</code> property is only evaluated during the <b>"prepareToStop"</b> state, it exists universally in the <code>stateData</code> definition of every state.
+  <p>Even though the <code>pedestrianCrossingRequested</code> property is only evaluated during the <b>"prepareToStop"</b> state, it exists universally in the <code>stateData</code> definition of every state.
   This persistence allows for the setting of this variable in any state while deferring evaluation until required, without the need for intricate scheduling logic.</p>
 
   ```ts
@@ -460,7 +466,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     }
   }
   ```
-  <p>As previously discussed traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <code>TrafficLightRequestCrossingComponent</code> to emit an event triggering the <code>CrossingControlBoxComponent</code> to transition to the supplied state.
+  <p>As previously discussed, traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <code>TrafficLightRequestCrossingComponent</code> to emit an event triggering the <code>CrossingControlBoxComponent</code> to transition to the supplied state.
   As with previous events, this <code>outputCrossingControlBoxState</code> emission is first captured by the <code>RequestCrossingAssemblyComponent</code> before being relayed to the <code>CrossingControlBoxComponent</code>. 
   Here it is assigned to the <code>crossingControlBoxState</code> <code>@Input</code> property and processed by the <code>ngOnChanges</code> function like so:</p>
 
@@ -514,8 +520,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   
   <div class="breakout-box">
     <h3>Customizing the State Diagram</h3>
-    <p>This article includes many state diagrams to help visualize the flow of an FSM. 
-    While the generation of the SVGs from these diagrams is outside the scope of <b>FsmRx</b>, it does include functionality to output the string templates third-party libraries use to generate these diagrams.
+    <p>This article includes many state diagrams to help visualize the flow of an FSM. While the generation of these SVG graphics is outside the scope of <b>FsmRx</b>, it does include functionality to output the string templates used by third-party libraries to generate these SVG diagrams.
     By default <b>FsmRx</b> outputs in <a href = "https://mermaid.js.org/" target="_blank">Mermaid.js</a> format which can be rendered in <b>Storybooks</b> using the <code>FsmRxDebugSetComponent</code> wrapper (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)).</p>
     
     <p>For the simple traffic light state diagram the template string and the rendered diagram are as follows:</p>
@@ -542,14 +547,14 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
     <p>This diagram is generated using three protected functions:</p>
     <ol>
-      <li><b>generateStateDiagramHead:</b> Used to generate the first three lines of the definition. These contain the version of the <b>Mermaid></b> rendering engine being used, 
+      <li><b>generateStateDiagramHead:</b> Used to generate the first three lines of the definition. These contain the version of the <b>Mermaid</b> rendering engine being used, 
       the direction to render the diagram and the initial <b>"FSMInit"</b> state node. </li>
       <li><b>generateStateTransition:</b> This function is called multiple times, once for each of the states and generates the transitions from this state node to all its destination states.</li>
       <li><b>generateStateDiagramClassDefs:</b> Generates the <code>classDef</code> which allows for custom stylings. By default, it applies styles to the <b>"highlight"</b> class.</li>
     </ol>
 
     <p>There is a fourth function called <b>getStateDiagramDefinition</b> which returns the generated string diagram template. This function takes in an optional <b>highlightState</b> parameter, which is the state to apply the <b>":::highlight"</b> class to.
-    In <b>FsmRx</b> this highlight class is used to represent the current state</p>
+    In <b>FsmRx</b> this highlight class is used to represent the current state.</p>
 
     ```ts
     type TrafficLightStates = "go" | "prepareToStop" | "stop";
@@ -607,7 +612,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   This <code>interval</code> function returns an observable that emits sequential numbers at a given interval.
   As these numbers are of no use, <code>switchMap</code> is used to instead emit the most recent value of<code>currentState$</code>.
   These emissions are subscribed to, supplying a callback function to be executed every time a value is emitted.
-  This function checks that the FSM is still in the <b>"finishWalking"</b> state and if it is calls <code>updateState</code> setting the <code>isWalkLightOn</code> boolean to its inverse value causing the walk light to flash.</p>
+  This function checks that the FSM is still in the <b>"finishWalking"</b> state and if it is, calls <code>updateState</code> setting the <code>isWalkLightOn</code> boolean to its inverse value causing the walk light to flash.</p>
 
   ```ts
   private handleEnterFinishWalking(onEnterStateChanges: OnEnterStateChanges<CrossingControlBoxStates, "finishWalking", CrossingControlBoxData, CrossingControlBoxCanLeaveToMap>): void {
@@ -629,7 +634,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <p>When dealing with <b>RxJS</b> observables, it's crucial to ensure they are correctly unsubscribed from, as neglecting to do so can hinder proper garbage collection.
   While there are several options for managing the termination of subscriptions, a common method is to use <code>takeUntil</code> which unsubscribes from the source observable when a second "notifier" observable emits a value.
-  For this purpose <b>FsmRx</b> includes a <code>nextChangeStateTransition$</code> subject which emits when the state is changed and a <code>destroy$</code> subject which emits when an <b>FsmRx</b> FSM is destroyed. 
+  For this purpose <b>FsmRx</b> includes a <code>nextChangeStateTransition$</code> subject which emits when the state is changed and a <code>destroy$</code> subject which emits when an FSM is destroyed. 
   For <code>FsmRxComponents</code> the <code>destroy$</code> subject is triggered automatically via the <code>ngOnDestroy</code> lifecycle hook but requires manual triggering for services and directives.</p>
 
   <p>The <code>interval</code> that handles the flashing of the crossing indicator light requires unsubscribing on both the destruction of the <code>CrossingControlBoxComponent</code>, using <code>takeUntil(this.destroy$)</code>, and when transitioning to the next state, using <code>takeUntil(this.nextChangeStateTransition$)</code>.</p>
@@ -648,20 +653,20 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>Transition Cancelling</h3>
 
-  <p>In the previous example conditional transitions were performed by checking a variable to determine the correct next state to transition to before the transition was made.
-  By using transition cancelling these conditional transitions can be executed as part of a transition lifecycle hook. 
-  Transition canceling takes advantage of <b>FsmRx's</b> self-recovery features to return to the last valid state when a lifecycle hook callback returns false.
+  <p>In the previous example, conditional transitions were performed by checking a variable to determine the correct next state to transition to before the transition was made.
+  By using transition cancelling these conditional transitions can be evaluated as part of a transition lifecycle hook. 
+  Transition cancelling takes advantage of <b>FsmRx's</b> self-recovery features to return to the last valid state when a lifecycle hook callback returns <code>false</code>.
   As <b>FsmRx</b> executes <b>RxJS</b> tasks using the <code>QueueScheduler</code>, any additional <code>changeState</code> or <code>updateState</code> transitions invoked inside a lifecycle hook are delayed until after the current task has been fully executed. 
   Scheduling a new transition while cancelling the current one allows for the conditional redirection of transitions in response to checks made inside lifecycle hooks.</p>  
 
   <div class="breakout-box examples">
-    <p>The complete code for the following ["Traffic Light Request Crossing Alternate"](?path=/story/examples-5-traffic-light-request-crossing-alternate--default) <br/> example story can be found in the folder <br/><b>"/projects/examples/src/stories/traffic-light-request-crossing-alternate"</b>.</p>
+    <p>The complete code for the following ["Traffic Light Request Crossing Alternate"](?path=/story/examples-5-traffic-light-request-crossing-alternate--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-request-crossing-alternate"</b>.</p>
   </div>
 
-  <p>The <code>TrafficLightRequestCrossingAlternateComponent</code> defines condition transition logic using transition cancelling via the <code>prepareToStop</code> states <code>onLeave</code> callback.
+  <p>The <code>TrafficLightRequestCrossingAlternateComponent</code> defines condition transition logic using transition cancelling via the <code>prepareToStop</code> states <code>onLeave</code> callback function.
   In this function, the value of the <code>pedestrianCrossingRequested</code> boolean is checked to determine if the transition is valid. 
   When this value is false the transition proceeds to its originally intended destination state.
-  However, when true the transition is canceled and a new transition to the <b>"stop_startWalking"</b> state, with <code>pedestrianCrossingRequested</code> reset to false, is added to the queue for execution after the FSM has reset.</p>
+  However, when true the transition is cancelled and a new transition to the <b>"stop_startWalking"</b> state, with <code>pedestrianCrossingRequested</code> reset to false, is added to the queue for execution after the FSM has reset.</p>
 
   ```ts
   private handleLeavePrepareToStop(onLeaveStateData: OnLeaveStateChanges<TrafficLightStates, "prepareToStop", TrafficLightRequestCrossingData, TrafficLightRequestCrossingAlternateCanLeaveToMap>): boolean {
@@ -684,7 +689,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   ```
   
-  <p>Handling branching logic using transition canceling may help separate logical concerns, with the drawback of making transitions more difficult to follow.
+  <p>Handling branching logic using transition cancelling may help separate logical concerns, with the drawback of making transitions more difficult to follow.
   Both methods of handling transitions are equally valid and come with their own tradeoffs. 
   Developers should use the method that makes the most sense for their particular use case.</p>
 

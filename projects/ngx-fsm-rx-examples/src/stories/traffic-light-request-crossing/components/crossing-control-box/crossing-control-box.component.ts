@@ -5,7 +5,6 @@ import { FsmRxComponent } from 'ngx-fsm-rx';
 import { UniqueCustomData, UniqueDataService } from 'ngx-fsm-rx/utils';
 import { interval, switchMap, takeUntil } from 'rxjs';
 
-
 export type CrossingControlBoxStates = "doNotWalk" | "startWalking" | "finishWalking";
 
 interface BaseCrossingControlBoxData extends BaseStateData<CrossingControlBoxStates> {
