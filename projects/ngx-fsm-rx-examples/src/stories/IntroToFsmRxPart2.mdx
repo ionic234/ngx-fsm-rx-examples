@@ -28,7 +28,7 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
   <p>This <b>"ngx-fsm-rx-examples"</b> project takes advantage of <b>Storybook</b>, a front-end code playground for previewing and experimenting with front-end components.
   <b>Storybook</b> provides a web interface where the completed example components can be viewed. 
   In the vernacular of <b>Storybook</b>, these examples are presented as stories. 
-  Stories allow us to set the inputs and default values of an <b>FsmRxComponent</b> through the use of <code>arg</code> controls, facilitating testing, experimentation and prototyping.</p>
+  Stories allow for the setting of an <b>FsmRxComponent</b> inputs and default values through the use of <code>arg</code> controls, facilitating testing, experimentation and prototyping.</p>
 
   <p>Inside <b>Storybook</b> we can also take advantage of an <b>NgxFsmRx</b> component called <b>FsmRxDebugSetComponent</b>. 
   This component wraps <b>FsmRxComponents</b>, providing state diagrams and changelogs for use in the test environment.
@@ -145,7 +145,7 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
   
   <h3>Extending FsmRx Classes</h3>
 
-  <p>These types can now be incorporated into the component class declaration by extending the abstract class <code>FsmRxComponent</code> and passing them in as type parameters.</p>
+  <p>These types can now be incorporated into the component class declaration by extending the abstract class <b>FsmRxComponent</b> and passing them in as type parameters.</p>
   
   ```typescript 
   export class TrafficLightSimpleComponent extends FsmRxComponent<
@@ -171,10 +171,10 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
       As different frameworks have different requirements for composition it would be difficult to support at the core level.</li>
       <li><b>Simplicity</b>: The use of abstract properties to enforce the declaration of required properties is arguably simpler than setting up providers for multiple instances of the same service.</li>
       <li><b>Custom Overrides</b>: Inheritance allows for easier overriding of functions to provide bespoke logic. This is especially useful for extending <b>FsmRx's</b> default diagram logic.</li>
-      <li><b>Storybook Integration </b>: <code>FsmRxComponent</code> exposes several functions that allow <b>Storybook</b> to display state diagrams and logging tools.
-       If composition was used these functions would have to be manually exposed for every <code>FsmRxComponent</code> subclass.</li>
+      <li><b>Storybook Integration </b>: <b>FsmRxComponent</b> exposes several functions that allow <b>Storybook</b> to display state diagrams and logging tools.
+       If composition was used these functions would have to be manually exposed for every <b>FsmRxComponent</b> subclass.</li>
     </ol>
-    <p>A compositional approach could be taken by extending <code>FsmRxInjectable</code> or <code>FsmRxComponent</code> into a service, but this has the potential to create more problems than it would solve.</p>
+    <p>A compositional approach could be taken by extending <code>FsmRxInjectable</code> or <b>FsmRxComponent</b> into a service, but this has the potential to create more problems than it would solve.</p>
   </div>
 
   <p>When extending an <b>FsmRx</b> class, it is a requirement that a constructor is defined. 
@@ -477,9 +477,9 @@ import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.
       });
   }
   ```
-  <h3>Generating <code>FsmRxComponents</code> and <code>FsmRxServices</code> using Schematics</h3>
+  <h3>Generating <b>FsmRxComponents</b> and <b>FsmRxServices</b> using Schematics</h3>
 
-  <p>To aid in the creation of FSMs, <b>NgxFsmRx</b> contains schematics to automate the production of the previously described types and configuration objects for both <code>FsmRxComponents</code> and <code>FsmRxServices</code>. 
+  <p>To aid in the creation of FSMs, <b>NgxFsmRx</b> contains schematics to automate the production of the previously described types and configuration objects for both <b>FsmRxComponents</b> and <b>FsmRxServices</b>. 
   These schematics support both long-form and shorthand command syntax as follows:</p>
   
   ```shell

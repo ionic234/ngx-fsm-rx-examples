@@ -26,8 +26,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <p>To achieve this the following three components are required:</p>
   
   <ul>
-    <li><b>TrafficLightRequestCrossingComponent</b>: An updated <code>TrafficLightSimpleComponent</code> with additional functionality to handle sequencing of the pedestrian crossing procedure.</li>
-    <li><b>CrossingControlBoxComponent</b>: A new <code>FsmRxComponent</code> that consists of a request crossing button, a light that indicates that this request has been received and a display that indicates when it is safe to cross.</li>
+    <li><b>TrafficLightRequestCrossingComponent</b>: An updated <b>TrafficLightSimpleComponent</b> with additional functionality to handle sequencing of the pedestrian crossing procedure.</li>
+    <li><b>CrossingControlBoxComponent</b>: A new <b>FsmRxComponent</b> that consists of a request crossing button, a light that indicates that this request has been received and a display that indicates when it is safe to cross.</li>
     <li><b>RequestCrossingAssemblyComponent</b>: A standard <b>Angular</b> component that facilitates communication between the <b>CrossingControlBoxComponent</b> and the <b>TrafficLightRequestCrossingComponent.</b></li>
   </ul>
 
@@ -54,7 +54,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>The Crossing Control Box Component</h3>
 
-  <p>The <code>CrossingControlBoxComponent</code> allows the user to press a button and request the ability to cross the road the next time the traffic light turns red.
+  <p>The <b>CrossingControlBoxComponent</b> allows the user to press a button and request the ability to cross the road the next time the traffic light turns red.
   It consists of a request crossing button, an indicator light that is activated when a crossing has been requested and a walk light that displays when it is safe to cross.
   These elements are defined in the <b>HTML</b> template which utilizes properties from the <code>stateData</code> observable to control their appearance:</p> 
 
@@ -290,7 +290,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>Reacting to User Input</h3>
 
-  <p>The <code>CrossingControlBoxComponent</code> contains a button element called <b>walk-button</b> which can be used to initiate the pedestrian crossing procedure. 
+  <p>The <b>CrossingControlBoxComponent</b> contains a button element called <b>walk-button</b> which can be used to initiate the pedestrian crossing procedure. 
   <b>Angular's</b> binding syntax is employed to invoke the <code>handleWalkButtonClicked</code> event handler upon clicking this <b>walk-button</b>.</p>
   
 
@@ -340,19 +340,19 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   
   <h3>Updating the Traffic Light to act as a Controller</h3>
 
-  <p>During the pedestrian crossing procedure it is vital that the states of the <code>CrossingControlBoxComponent</code> and <code>TrafficLightRequestCrossingComponent</code> remain synchronized. 
-  To ensure this happens, the <code>TrafficLightRequestCrossingComponent</code> acts as the controller with the responsibility of informing the delegate <code>CrossingControlBoxComponent</code> of the state it should be in.
-  This necessitates the addition of two composite states <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> to the <code>TrafficLightRequestCrossingComponent</code> state string union.</p>
+  <p>During the pedestrian crossing procedure it is vital that the states of the <b>CrossingControlBoxComponent</b> and <b>TrafficLightRequestCrossingComponent</b> remain synchronized. 
+  To ensure this happens, the <b>TrafficLightRequestCrossingComponent</b> acts as the controller with the responsibility of informing the delegate <b>CrossingControlBoxComponent</b> of the state it should be in.
+  This necessitates the addition of two composite states <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> to the <b>TrafficLightRequestCrossingComponent</b> state string union.</p>
 
   ```ts
   type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stop_startWalking" | "stop_finishWalking";
   ```
    
-  <p>These composite states describe both the visual state of the <code>TrafficLightRequestCrossingComponent</code> (<b>"stop"</b>) and the instruction sent to the <code>CrossingControlBoxComponent</code>(<b>"startWalking"</b> / <b>"finishWalking"</b>) as follows:</p>
+  <p>These composite states describe both the visual state of the <b>TrafficLightRequestCrossingComponent</b> (<b>"stop"</b>) and the instruction sent to the <b>CrossingControlBoxComponent</b>(<b>"startWalking"</b> / <b>"finishWalking"</b>) as follows:</p>
   <ul>
-    <li>Entering the <b>"stop_startWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"startWalking"</b> state.</li>
-    <li>Entering the <b>"stop_finishWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"finishWalking"</b> state.</li>
-    <li>Leaving the <b>"stop_finishWalking"</b> state signals the <code>CrossingControlBoxComponent</code> to enter its <b>"doNotWalk"</b> state.</li>
+    <li>Entering the <b>"stop_startWalking"</b> state signals the <b>CrossingControlBoxComponent</b> to enter its <b>"startWalking"</b> state.</li>
+    <li>Entering the <b>"stop_finishWalking"</b> state signals the <b>CrossingControlBoxComponent</b> to enter its <b>"finishWalking"</b> state.</li>
+    <li>Leaving the <b>"stop_finishWalking"</b> state signals the <b>CrossingControlBoxComponent</b> to enter its <b>"doNotWalk"</b> state.</li>
   </ul>
 
   <p>This is demonstrated in the following code:</p>
@@ -387,7 +387,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
   <h3>Sequencing Events</h3>
 
-  <p>When the <code>CrossingControlBoxComponent</code> emits the <code>outputWalkButtonClicked</code> event, it is first captured by the <code>RequestCrossingAssemblyComponent</code> then passed to the <code>TrafficLightRequestCrossingComponent</code> via its <code>walkButtonEvent</code> <code>@Input</code>.
+  <p>When the <b>CrossingControlBoxComponent</b> emits the <code>outputWalkButtonClicked</code> event, it is first captured by the <b>RequestCrossingAssemblyComponent</b> then passed to the <b>TrafficLightRequestCrossingComponent</b> via its <code>walkButtonEvent</code> <code>@Input</code>.
   As in any other <b>Angular</b> component, <code>@Input</code> properties are processed using the <code>ngOnChanges</code> <b>Angular</b> lifecycle hook. 
   When a <code>walkButtonEvent</code> change is detected, the current state is retrieved from the <code>currentState$</code> observable and updated, using the <code>updateState</code> function, setting the <code>pedestrianCrossingRequested</code> boolean to true.</p>
 
@@ -411,7 +411,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   When implementing custom <code>ngOnChanges</code> logic it is necessary to override this function and immediately call <code>super.ngOnChanges(changes)</code> to ensure default functionality is preserved.</p>
 
 
-  <p>The <code>TrafficLightRequestCrossingComponent</code> schedules all state transitons using a function called <code>delayToStateChange</code>.
+  <p>The <b>TrafficLightRequestCrossingComponent</b> schedules all state transitons using a function called <code>delayToStateChange</code>.
   For the majority of states this function will transition to the first entry in the <code>canLeaveTo</code> array, 
   however when transitioning from the <b>"prepareToStop"</b> state the value of <code>pedestrianCrossingRequested</code> is checked, forking to the <b>"stop_startWalking"</b> state if true or the <b>"stop"</b> state if false.</p>
 
@@ -442,7 +442,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <figure>
     <div>
       <img src={trafficLightRequestCrossingStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 20px 89px 10px', width: '470px' }} />
-      <figcaption>The state diagram showing the branching behavior of the <code>TrafficLightRequestCrossingComponent</code> resulting from the checks perfomed when leaving the <b>"prepareToStop"</b> state.</figcaption>
+      <figcaption>The state diagram showing the branching behavior of the <b>TrafficLightRequestCrossingComponent</b> resulting from the checks perfomed when leaving the <b>"prepareToStop"</b> state.</figcaption>
     </div>
   </figure>
   
@@ -466,8 +466,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     }
   }
   ```
-  <p>As previously discussed, traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <code>TrafficLightRequestCrossingComponent</code> to emit an event triggering the <code>CrossingControlBoxComponent</code> to transition to the supplied state.
-  As with previous events, this <code>outputCrossingControlBoxState</code> emission is first captured by the <code>RequestCrossingAssemblyComponent</code> before being relayed to the <code>CrossingControlBoxComponent</code>. 
+  <p>As previously discussed, traversing the <b>"stop_startWalking"</b> and <b>"stop_finishWalking"</b> path will cause the <b>TrafficLightRequestCrossingComponent</b> to emit an event triggering the <b>CrossingControlBoxComponent</b> to transition to the supplied state.
+  As with previous events, this <code>outputCrossingControlBoxState</code> emission is first captured by the <b>RequestCrossingAssemblyComponent</b> before being relayed to the <b>CrossingControlBoxComponent</b>. 
   Here it is assigned to the <code>crossingControlBoxState</code> <code>@Input</code> property and processed by the <code>ngOnChanges</code> function like so:</p>
 
   ```ts
@@ -521,7 +521,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <div class="breakout-box">
     <h3>Customizing the State Diagram</h3>
     <p>This article includes many state diagrams to help visualize the flow of an FSM. While the generation of these SVG graphics is outside the scope of <b>FsmRx</b>, it does include functionality to output the string templates used by third-party libraries to generate these SVG diagrams.
-    By default <b>FsmRx</b> outputs in <a href = "https://mermaid.js.org/" target="_blank">Mermaid.js</a> format which can be rendered in <b>Storybooks</b> using the <code>FsmRxDebugSetComponent</code> wrapper (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)).</p>
+    By default <b>FsmRx</b> outputs in <a href = "https://mermaid.js.org/" target="_blank">Mermaid.js</a> format which can be rendered in <b>Storybooks</b> using the <b>FsmRxDebugSetComponent</b> wrapper (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)).</p>
     
     <p>For the simple traffic light state diagram the template string and the rendered diagram are as follows:</p>
 
@@ -635,9 +635,9 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <p>When dealing with <b>RxJS</b> observables, it's crucial to ensure they are correctly unsubscribed from, as neglecting to do so can hinder proper garbage collection.
   While there are several options for managing the termination of subscriptions, a common method is to use <code>takeUntil</code> which unsubscribes from the source observable when a second "notifier" observable emits a value.
   For this purpose <b>FsmRx</b> includes a <code>nextChangeStateTransition$</code> subject which emits when the state is changed and a <code>destroy$</code> subject which emits when an FSM is destroyed. 
-  For <code>FsmRxComponents</code> the <code>destroy$</code> subject is triggered automatically via the <code>ngOnDestroy</code> lifecycle hook but requires manual triggering for services and directives.</p>
+  For <b>FsmRxComponents</b> the <code>destroy$</code> subject is triggered automatically via the <code>ngOnDestroy</code> lifecycle hook but requires manual triggering for services and directives.</p>
 
-  <p>The <code>interval</code> that handles the flashing of the crossing indicator light requires unsubscribing on both the destruction of the <code>CrossingControlBoxComponent</code>, using <code>takeUntil(this.destroy$)</code>, and when transitioning to the next state, using <code>takeUntil(this.nextChangeStateTransition$)</code>.</p>
+  <p>The <code>interval</code> that handles the flashing of the crossing indicator light requires unsubscribing on both the destruction of the <b>CrossingControlBoxComponent</b>, using <code>takeUntil(this.destroy$)</code>, and when transitioning to the next state, using <code>takeUntil(this.nextChangeStateTransition$)</code>.</p>
 
   ```ts
   private handleEnterFinishWalking(onEnterStateChanges: OnEnterStateChanges<CrossingControlBoxStates, "finishWalking", CrossingControlBoxData, CrossingControlBoxCanLeaveToMap>): void {
@@ -663,7 +663,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     <p>The complete code for the following ["Traffic Light Request Crossing Alternate"](?path=/story/examples-5-traffic-light-request-crossing-alternate--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-request-crossing-alternate"</b>.</p>
   </div>
 
-  <p>The <code>TrafficLightRequestCrossingAlternateComponent</code> defines condition transition logic using transition cancelling via the <code>prepareToStop</code> states <code>onLeave</code> callback function.
+  <p>The <b>TrafficLightRequestCrossingAlternateComponent</b> defines condition transition logic using transition cancelling via the <code>prepareToStop</code> states <code>onLeave</code> callback function.
   In this function, the value of the <code>pedestrianCrossingRequested</code> boolean is checked to determine if the transition is valid. 
   When this value is false the transition proceeds to its originally intended destination state.
   However, when true the transition is cancelled and a new transition to the <b>"stop_startWalking"</b> state, with <code>pedestrianCrossingRequested</code> reset to false, is added to the queue for execution after the FSM has reset.</p>

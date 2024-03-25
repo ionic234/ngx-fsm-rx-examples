@@ -17,11 +17,11 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   <hr />
   <h2>Part 5: Debugging FsmRxComponents using Storybook</h2>
   
-  <p>During component development it can often be useful to execute the code you are working on for validation, debugging and experimentation purposes. 
+  <p>During component development it can often be useful to execute code for validation, debugging and experimentation purposes. 
   Yet, testing components within an application environment can be time-consuming, especially when they're not readily accessible on the main page.
   Functionality hidden behind login screens or embedded in complex user journeys poses particular challenges for efficient testing.</p>
 
-  <p>To speed up the development FsmRx has been designed to work with <a href = "https://storybook.js.org/docs/get-started/why-storybook" target="_blank">Storybook</a>, a frontend playground built for the rapid testing of components in isolation.</p>
+  <p>To speed up development FsmRx has been designed to work with <a href = "https://storybook.js.org/docs/get-started/why-storybook" target="_blank">Storybook</a>, a frontend playground built for the rapid testing of components in isolation.</p>
 
   <div class="breakout-box examples">
     <p>The complete code for the following ["Traffic Light Overridable"](?path=/story/examples-6-traffic-light-overridable--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-overridable"</b>.</p>
@@ -29,8 +29,8 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   <h3>Defining a Storybook Story</h3>
 
-  <p>To display a component in <b>Storybook</b> we create a special config file known as a <b>Story</b> with the extension ".stories.ts".
-  These stories are written in <b>Component Story Format (CSF)</b> and allow us to configure components for use within the <b>Storybook</b> playground, while also defining metadata such as its title and any arguments or inputs it accepts.</p>
+  <p>To display a component in <b>Storybook</b> a special config file known as a <b>Story</b> with the extension ".stories.ts" is required.
+  These stories are written in <b>Component Story Format (CSF)</b> and allow for the configuration of components for use within the <b>Storybook</b> playground, while also defining metadata such as its title and any arguments or inputs it accepts.</p>
 
   <p>Below is the bare minimum required to configure a story for the <b>TrafficLightOverridableComponent</b>. 
   It gives the component a human-readable title as well as exporting the <code>Meta</code> and <code>Story</code> properties required for rendering the component in the playground.</p>
@@ -46,16 +46,16 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   export const Default: Story = {};
   ```
-  <p>The <code>Meta</code> property allows us to configure the controls, interactions and default arguments/inputs of a given component class, while the <code>Story</code> property allows us to configure an individual instance of a component.</p>
+  <p>The <code>Meta</code> property is used to configure the controls, interactions and default arguments/inputs of a given component class, while the <code>Story</code> property is used to configure an individual component use case.</p>
     
   <h3>Defining Component Decorators Using the <code>Meta</code> Property</h3>
 
   <p>While the previous story example is sufficient for simple use cases, more complex components often rely on external code dependencies and other components.
   They may import common functionality from third-party libraries, incorporate subordinate child elements within their <b>HTML</b> templates or be enclosed by a parent component.</p>
 
-  <p>We can add a <code>decorators</code> section to our stories <code>Meta</code> to wrap components with additional functionality or styling.
-  Inside <code>decorators</code> we can define a <code>moduleMetadata</code> parameter for importing external modules and declaring child component dependencies.
-  This <code>moduleMetadata</code> is analogous to <b>Angulars</b> <code>NgModule</code> declarations.</p>
+  <p>A <code>decorators</code> section can be added to a stories <code>Meta</code> to wrap components with additional functionality or styling.
+  Inside <code>decorators</code> a <code>moduleMetadata</code> parameter is defined for importing external modules and declaring child component dependencies.
+  This <code>moduleMetadata</code> is analogous to <b>Angular's</b> <code>NgModule</code> declarations.</p>
   
   ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -69,7 +69,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   };
   ```
 
-  <p>We can also define a decorator to wrap our component in additional <b>HTML</b> by defining a <code>componentWrapperDecorator</code> function.</p>
+  <p>A <code>componentWrapperDecorator</code> function can also be defined in this <code>decorators</code> section to wrap components in additional <b>HTML</b>.</p>
     
   ```ts
     const meta: Meta<TrafficLightOverridableComponent> = {
@@ -84,17 +84,17 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   <h3>Displaying Default FsmRx Debug Information</h3>
 
-  <p><b>FsmRx</b> contains a helpful wrapper component called <code>FsmRxDebugSetComponent</code>. 
+  <p><b>FsmRx</b> contains a helpful wrapper component called <b>FsmRxDebugSetComponent</b>. 
   This component automatically hooks into an <b>FsmRxComponents</b> <code>outputDebugLog</code> and <code>outputStateDiagramDefinition</code> outputs to render a State Diagram of its FSM transitions as well as a configurable debug log.</p>
   
   <figure>
     <div>
       <img src={fsmRxDebugSetExample} alt="fsm-rx-debug-set wrapping the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
-      <figcaption>The state diagram and debug log provided by wrapping the <code>TrafficLightOverridableComponent</code> in an <code>FsmRxDebugSetComponent</code>.</figcaption>
+      <figcaption>The state diagram and debug log provided by wrapping the <b>TrafficLightOverridableComponent</b> in an <b>FsmRxDebugSetComponent</b>.</figcaption>
     </div>
   </figure>
 
-  <p>To configure a story to use the <code>FsmRxDebugSetComponent</code> it must be added, along with its children, to the <code>Meta.decorators.moduleMetadata</code> property:</p>
+  <p>To configure a story to use the <b>FsmRxDebugSetComponent</b> it must be added, along with its children, to the <code>Meta.decorators.moduleMetadata</code> property:</p>
 
   ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -108,11 +108,11 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   }
   ```
 
-  <p>To ensure proper rendering of the <code>FsmRxDebugSetComponent</code> it's essential to update the target <b>FsmRxComponents</b> element to include the <code>#fsmRxComponent</code> template reference variable. 
-  This reference is necessary for the <code>FsmRxDebugSetComponent</code> to interface with the target <b>FsmRxComponent</b> and bind to its outputs. </p>
+  <p>To ensure proper rendering of the <b>FsmRxDebugSetComponent</b> it's essential to update the target <b>FsmRxComponents</b> element to include the <code>#fsmRxComponent</code> template reference variable. 
+  This reference is necessary for the <b>FsmRxDebugSetComponent</b> to interface with the target <b>FsmRxComponent</b> and bind to its outputs. </p>
   
   <p>The target <b>FsmRxComponents</b> template is provided as the first argument to the <code>componentWrapperDecorator</code> function in the form of a standard <b>HTML</b> tag string. 
-  This allows us to modify it with any string transformation function. </p>
+  This allows for modification with any string transformation function. </p>
   
    ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -126,15 +126,16 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
     ]
   }
   ```
-  <p>The <code>FsmRxDebugSetComponent</code> supports the input parameter <code>debugLogKeys</code>, which is an array of state data properties to include in the <b>"Transition Data"</b> column of the debug log and allows for easy configuration of the data to be displayed.
+  <p>The <b>FsmRxDebugSetComponent</b> supports the input parameter <code>debugLogKeys</code>, which is an array of state data properties to include in the <b>"Transition Data"</b> column of the debug log. 
+  This allows for easy configuration of the data to be displayed.
   If omitted only the <code>state</code> property is displayed. </p>
   
   <h3>Customizing FsmRxComponents via FsmConfig Objects</h3>
 
   <p>The behavior of <b>FsmRx</b> classes can be configured by providing a config object via their constructors. Additionally, <b>FsmRxComponents</b> can accept this config through a <code>fsmConfig</code> input.
-  Many of these options affect what data is logged and emitted making them useful for debugging with the <code>FsmRxDebugSetComponent</code>.</p> 
+  Many of these options affect what data is logged and emitted, making them useful for debugging with the <b>FsmRxDebugSetComponent</b>.</p> 
    
-  <p>The following table documents all of the available configuration options:</p> 
+  <p>The following table documents the available configuration options:</p> 
 
   <table>
     <thead>
@@ -184,7 +185,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
       </tr>
       <tr>
         <td>outputTransitionRejectionToConsole</td>
-        <td>Whether output transition rejections are logged to the browser's console.</td>
+        <td>Whether transition rejections are logged to the browser's console.</td>
         <td>true</td>
         <td>false</td>
         <td>Only writable in dev mode.</td>
@@ -214,7 +215,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
         <td>stateDiagramDirection</td>
         <td>The direction the FSMs state diagram is drawn in.</td>
         <td>"TB"</td>
-        <td>"TB</td>
+        <td>"TB"</td>
         <td>"TB" = Top To Bottom <br/> "LR" = Left To Right</td>
       </tr>
       <tr>
@@ -237,7 +238,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   To address these issues and provide default values, the gaps can be filled by specifying an <code>args</code> object within the <code>Meta</code>. 
   When defining an object variable as an <code>arg</code>, <b>Storybook</b> will only create controls for the keys that are provided default values. </p>
   
-  <p>A useful control for debugging <code>FsmRxComponents</code> that <b>Storybook</b> fails to discover is the <code>fsmConfig</code> input which can be configured as follows:</p>
+  <p>A useful control for debugging <b>FsmRxComponents</b> that <b>Storybook</b> fails to discover is the <code>fsmConfig</code> input which can be configured as follows:</p>
 
   ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -270,7 +271,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   These issues can be addressed using a plugin called <a href = "https://storybook.js.org/addons/storybook-addon-deep-controls" target="_blank"> deep-controls</a>.
   This plugin allows for the targeting of individual object properties via their own dedicated control, maintaining the required functionality while significantly enhancing the UI.</p>
 
-  <p>Once installed via the command <code>npm install storybook-addon-deep-controls</code> the plugin is enabled using the <code>Meta.parameters</code> object.</p>
+  <p>Once installed via the command <code>npx storybook@latest add storybook-addon-deep-controls</code> the plugin is enabled using the <code>Meta.parameters</code> object.</p>
 
    ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -282,7 +283,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   }
   ```
 
-  <h3>Configuring Controls uUsing <code>argTypes</code></h3>
+  <h3>Configuring Controls Using <code>argTypes</code></h3>
 
   <p>While <b>Storybook</b> does an admirable job of automatically configuring the required controls, these defaults can be overridden and customized using the <code>Meta.argTypes</code> property.
   This allows for the definition of an individual controls data type, limiting the values it accepts which results in a more intuitive UI.
@@ -345,13 +346,13 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
     <h3>Hiding Unwanted Controls</h3>
 
   <p>Occasionally <b>Storybook</b> will identify variables that you do not want to offer controls for. 
-  This could be because changing them may break functionality or have no discernable effect after initialization.
-  For the <code>TrafficLightOverridableComponent</code> <b>Storybook</b> identifies the following unwanted controls</p>
+  This could be because changing them may break functionality or have no discernable effect after initialisation.
+  For the <b>TrafficLightOverridableComponent</b> <b>Storybook</b> identifies the following unwanted controls:</p>
 
   <figure>
     <div>
       <img src={unwantedControls} alt="Unwanted controls for the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
-      <figcaption>The unwanted controls <b>Storybook</b> generates for the <code>TrafficLightOverridableComponent</code>.</figcaption>
+      <figcaption>The unwanted controls <b>Storybook</b> generates for the <b>TrafficLightOverridableComponent</b>.</figcaption>
     </div>
   </figure>
 
@@ -371,16 +372,16 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   <h3>Overriding the State</h3>
 
-  <p>To greatly simplify testing and development <b>FsmRx</b> includes a method of directly interfacing with states and their associated data via the <code>fsmCongig.stateOverride</code> property.
+  <p>To greatly simplify testing and development, <b>FsmRx</b> includes a method of directly interfacing with states and their associated data via the <code>fsmCongig.stateOverride</code> property.
   By default, this property is set to false, but it can be assigned a <code>StateOverride</code> object when an override is required. 
   Overriding the state allows for the circumventing of <code>FsmRx</code> transition validation logic to jump to any desired state from any other in the FSM.</p>
 
-  <p><i>Note: The use of <code>stateOverride</code> in production is not supported, as it can cause unexpected behavior, and is only intended for debugging purposes. 
+  <p><i>Note: The use of <code>stateOverride</code> in production is not supported, as it can cause unexpected behaviour, and is only intended for debugging purposes. 
   Any attempt to set <code>stateOverride</code> in a production environment will be ignored.</i></p> 
 
   <p>The <code>StateOverride</code> object includes two properties: <code>stateData</code>, which represents the data for the override state, and an optional <code>onOverride</code> callback function that is triggered after the override has been applied.</p> 
 
-  <p>An override state can be added to the <code>TrafficLightOverridableComponent</code> using the <code>Meta</code>.</p>
+  <p>An override state can be added to the <b>TrafficLightOverridableComponent</b> using the <code>Meta</code>.</p>
 
   ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -401,8 +402,8 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   }
   ```
 
-  <p>This will add default controls that allow us to change the state of the FSM to any other required state.
-  As with other <code>controls</code>, <code>deepControls</code> and the <code>argTypes</code> object can be used to customize them as required:</p>
+  <p>This will add default controls that allow changing the state of the FSM to any other required state.
+  As with other controls, <code>deepControls</code> and the <code>argTypes</code> object can be used to customise as required:</p>
 
   ```ts
   const meta: Meta<TrafficLightOverridableComponent> = {
@@ -433,7 +434,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   <figure>
     <div>
       <img src={fsmConfigOverrideControls} alt="Override controls for the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
-      <figcaption>Custom controls that allows for overwriting of the <code>TrafficLightOverridableComponent</code> state data.</figcaption>
+      <figcaption>Custom controls that allows for overwriting of the <b>TrafficLightOverridableComponent</b> state data.</figcaption>
     </div>
   </figure>
 
@@ -446,7 +447,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   <p>When transitioning to a state using a <code>stateOverride</code> neither the <code>onLeave</code> or <code>onEnter</code> lifecycle hooks are executed.
   This presents a problem when testing components that use these hooks to setup and teardown state-specific functionality.</p>
 
-  <p>The <code>TrafficLightOverridableComponent</code> defines an <code>onEnter</code> function, shared between each of its states, called <code>handleEnterState</code>.
+  <p>The <b>TrafficLightOverridableComponent</b> defines an <code>onEnter</code> function, shared between each of its states, called <code>handleEnterState</code>.
   This function handles scheduling of the transitions to the next state via the creation of a <code>Timeout</code>, a reference to which is stored in the state data by immediately calling <code>onUpdate</code> after a successful <code>changeState</code> transition.</p>
 
   ```ts
@@ -469,8 +470,8 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   }
   ```
 
-  <p>Applying an override to the <code>TrafficLightOverridableComponent</code> bypasses this function. 
-  While the template will update to show the new state, as none of the transition logic will execute it will remain there indefinitely.
+  <p>Applying an override to the <b>TrafficLightOverridableComponent</b> bypasses this function. 
+  While the template will update to show the new state, as none of the transition logic will execute, it will remain there indefinitely.
   This may be desirable when working on errors with the visual presentation but otherwise can be remedied via the addition of an <code>onOverride</code> callback.</p>
    
   ```ts
@@ -508,12 +509,12 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   <p>Similar to other lifecycle hook callbacks, this function receives an object that describes the transition. 
   This <code>OnOverrideStateChanges</code> object contains data for both the original state and the overriding state which can be used to replicate any required <code>onLeave</code> or <code>onEnter</code> functionality.</p>
 
-  <p>In the preceding <code>onOverride</code> function for the <code>TrafficLightOverridableComponent</code> the <code>originalStateInfo</code> is used to retrieve the ID of the original states ongoing timeout for clearing, 
+  <p>In the preceding <code>onOverride</code> function for the <b>TrafficLightOverridableComponent</b> the <code>originalStateInfo</code> is used to retrieve the ID of the original states ongoing timeout for clearing, 
   while the <code>overridingStateInfo</code> is used to schedule the transition to the next state.</p>
 
-  <p><i>Note: For an <code>onOverride</code> function defined in a stories <code>Meta</code> to have access to the <code>FsmRxComponents</code> methods and properties it must be provided a reference to its <code>This</code> object, which can be achieved using parameter annotation.</i></p>
+  <p><i>Note: For an <code>onOverride</code> function defined in a stories <code>Meta</code> to have access to the <b>FsmRxComponents</b> methods and properties it must be provided a reference to its <code>This</code> object, which can be achieved using parameter annotation.</i></p>
    
-  <h3>Canceling RxJS Subscriptions when Overriding</h3>
+  <h3>Cancelling RxJS Subscriptions when Overriding</h3>
   
   <p>In previous Traffic Light examples the RxJS <code>Timer</code> is used for scheduling transitions.
   To aid with canceling <b>RxJS</b> subscriptions when overriding state, <b>FsmRx</b> contains a subject called <code>override$</code> which emits whenever an override occurs.
@@ -569,14 +570,14 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   ```
  
   <p><i>Note: It is not recommended to use <code>stateData$</code> as a <code>takeUntil</code> notifier as it is a <code>behaviourSubjet</code> and will emit as soon as it is subscribed to. 
-  It is also updated at the end of the transition after the callbacks have been executed.</i></p>
+  The <code>nextChangeStateTransition$</code> subject should be used instead.</i></p>
 
   <h3>Conditional Story Controls</h3>
 
   <p>States often have unique data requirements, leading to properties that are specific to certain states. 
   In such instances, employing conditional controls allows for the display of only the controls relevant to a particular state in question.</p>
 
-  <p>The <code>UserLoginComponent</code> example login form contains an <code>errorMessage</code> property that is only defined in the state data if the user inputs an invalid username and password combination.</p>
+  <p>The <b>UserLoginComponent</b> example login form contains an <code>errorMessage</code> property that is only defined in the state data if the user inputs an invalid username and password combination.</p>
 
   <div class="breakout-box examples">
     <p>The complete code for the following ["User Login"](?path=/story/examples-8-user-login--static) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/user-login"</b>.</p>
@@ -628,12 +629,12 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   export const Functional: Story = {}
   ```
   
-  <p>When applied to the <code>UserLoginComponent</code> story this creates two entries under <b>"User Login"</b> called <b>"Static"</b> and <b>"Functional"</b>.</p>
+  <p>When applied to the <b>UserLoginComponent</b> story this creates two entries under <b>"User Login"</b> called <b>"Static"</b> and <b>"Functional"</b>.</p>
 
   <figure>
     <div>
       <img src={exampleStoriesMenu} alt="fsm-rx-debug-set wrapping the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
-      <figcaption>The <b>"Examples"</b> menu showing the <b>"Static"</b> and <b>"Functional".</b> stories.</figcaption>
+      <figcaption>The <b>"Examples"</b> menu showing the <b>"Static"</b> and <b>"Functional"</b> stories.</figcaption>
     </div>
   </figure>
 
@@ -702,14 +703,14 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   <h3>Debugging Failed Transitions</h3>
 
-  <p><b>FsmRx</b> has been designed to be self-recoverable, if an error is detected or a transition cancelled, it will always reset to the last valid state.
-  In the event of a failed transition, developers can get details about the failure and perform additional side effects, like bug reporting, via the automatically invoked <code>onTransitionRejected</code> function.</p>
+  <p><b>FsmRx</b> has been designed to be self-recoverable. If an error is detected or a transition cancelled, it will always reset to the last valid state.
+  In the event of a failed transition, developers can get details about the failure and perform additional side effects, such as bug reporting, via the automatically invoked <code>onTransitionRejected</code> function.</p>
 
   <p><i>Note: This function is only intended for debugging purposes. 
   Unexpected transition rejections should be fixed in the logic of the FSM rather than patched here.
   The <code>onTransitionRejected</code> function is however an excellent place to submit a bug report containing the <code>debugLog</code>.</i></p>
 
-  <p>By default this function is empty but can be overridden like so:</p>
+  <p>By default this function is empty but can be overridden as follows:</p>
 
   ```ts
   protected override onTransitionRejected(transitionRejection: TransitionRejection) {
@@ -725,15 +726,15 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
   <ul>
     <li><code>after_fsm_destroy</code>: An attempt was made to transition after the FSM had been destroyed.</li>
     <li><code>illegal_change_same_state</code>: An attempt was made to change the state to the current state.</li>
-    <li><code>illegal_update_FSMInit</code>: An attempt was made to update the FSMInit State. </li>
+    <li><code>illegal_update_FSMInit</code>: An attempt was made to update the <b>"FSMInit"</b> state. </li>
     <li><code>internal_error:</code>: A data mismatch occurred, causing the transition to fail. Please submit a ticket if you encounter this error.</li>
     <li><code>not_permitted_to_enter</code>: Attempted to change to a state you are not permitted to enter to from the current state.</li>
     <li><code>not_permitted_to_leave</code>: Attempted to change to a state you are not permitted to leave to from the current state.</li>
     <li><code>override_in_production</code>: An attempt was made to override a state while in production mode.</li>
     <li><code>repeat_update_filtered</code>: A repeated update with the same data as the current state was filtered.</li>
-    <li><code>terminated_by_enter_callback</code>: The onEnter callback returned false, terminating the transition.</li>
-    <li><code>terminated_by_leave_callback</code>: The onLeave callback returned false, terminating the transition.</li>
-    <li><code>terminated_by_update_callback</code>: The onUpdate callback returned false, terminating the update. </li>
+    <li><code>terminated_by_enter_callback</code>: The <code>onEnter</code> callback returned false, terminating the transition.</li>
+    <li><code>terminated_by_leave_callback</code>: The <code>onLeave</code> callback returned false, terminating the transition.</li>
+    <li><code>terminated_by_update_callback</code>: The <code>onUpdate</code> callback returned false, terminating the update. </li>
     <li><code>unknown_error</code>: An unexpected error has occurred. Please submit a ticket if you see this error.</li>
     <li><code>update_state_mismatch</code>: An attempt was made to update the state with data that doesn't match the current state.</li>
   </ul>
@@ -760,9 +761,9 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
     <h3>Unit testing observables using the Rxjs TestScheduler</h3>
     
     <p>Unit testing is a vital part of modern software development, however testing asynchronous code can be challenging.
-    As <b>FsmRx</b> is built upon <b>RxJS</b> we can use its <code>TestScheduler</code> utility test to write simple robust asynchronous unit tests.</p>
+    As <b>FsmRx</b> is built upon <b>RxJS</b> its <code>TestScheduler</code> utility can be used to write simple robust asynchronous unit tests.</p>
           
-    <p>The <code>TestScheduler</code> enables assessment of the behavior of the<code>observables</code> in the system over time by scheduling events in a simulated timeline, running this simulation, and then comparing the values emitted with those anticipated in a <code>Marble Diagram</code>.</p>
+    <p>The <code>TestScheduler</code> enables assessment of the behaviour of the<code>observables</code> in the system over time by scheduling events in a simulated timeline, running this simulation, and then comparing the values emitted with those anticipated in a <code>Marble Diagram</code>.</p>
 
     <p><i>The following example can be found at:<br/> <b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-simple/traffic-light-simple.spec.ts"</b> </i></p>
 
@@ -797,7 +798,7 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
       
     });
     ``` 
-    <p>Tests that utilize the <code>TestScheduler</code> can be though of as having two phases, the <b>schedule</b> phase and the <b>run</b> phase.</p>
+    <p>Tests that utilise the <code>TestScheduler</code> can be thought of as having two phases, the <b>schedule</b> phase and the <b>run</b> phase.</p>
 
     <p>In the <b>schedule</b> phase, the <code>TestScheduler.schedule</code> function is used to define any scheduled events that require testing.
     The <code>TestScheduler.schedule</code> function accepts a callback used to execute the required event and a delay that specifies when in the simulated timeline the event should occur.</p>
@@ -816,18 +817,18 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
     })
     ```
     
-    <p>When testing with <code>FsmRx</code>, we usually test events that cause the <code>OnChange</code> or <code>OnUpdate</code> functions to be called. 
+    <p>Testing with <code>FsmRx</code>, usually tests events that cause the <code>OnChange</code> or <code>OnUpdate</code> functions to be called. 
     By default <code>OnChange</code> and <code>OnUpdate</code> are protected functions, so if you wish to test them directly you will need to extend your SUT and expose them.</p>
     
-    <p>In the <b>Run</b> phase, the scheduled events are executed in a virtualized time environment using the <code>TestScheduler.run</code> function.
+    <p>In the <b>Run</b> phase, the scheduled events are executed in a virtualised time environment using the <code>TestScheduler.run</code> function.
     This <code>TestScheduler.run</code> function accepts a callback where test assertions are made. 
     This callback is supplied an object called <code>RunHelpers</code>, which contains utility methods to assist with testing.
-    When testing <code>FsmRx</code> we use the <code>expectObservable</code> utility method to subscribe to our SUT's <code>stateData$</code> observable stream and assert against the values it emits using the returned <code>toBe</code> operator.
+    When testing <code>FsmRx</code> the <code>expectObservable</code> utility method is used to subscribe to the SUT's <code>stateData$</code> observable stream and assert against the values it emits using the returned <code>toBe</code> operator.
     The <code>toBe</code> operator expects two parameters, a <code>Marble Diagram</code> representing when emissions happen and an object that describes what is emitted.</p>
     
     <p>A <code>Marble Diagram</code> is a string representation of a timeline of events describing an observable sequence over time.
     Each character represents one unit of time called a frame, which during testing is equal to one millisecond.
-    Emitted data is represented by a single alphanumeric value, while time progression can be described using either dashes "-" or millisecond values e.g. "10ms".
+    Emitted data is represented by a single alphabetic character, while time progression can be described using either dashes "-" or millisecond values e.g. "10ms".
     The end of the timeline is described using the pipe "|" character.</p>
 
     <p>The following code asserts that the <code>stateData$</code> observable will emit the values 1,2 and 3 at intervals of one millisecond, before completing. 
@@ -846,17 +847,17 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
     })
     ```
 
-    <p>The following example shows a test to assert that the <code>TrafficLightSimpleComponent</code> (demonstrated in ["Part 2: Creating a simple traffic light component with FsmRx"](?path=/docs/2-creating-a-simple-traffic-light-component-with-fsmrx--docs))
+    <p>The following example shows a test to assert that the <b>TrafficLightSimpleComponent</b> (demonstrated in ["Part 2: Creating a simple traffic light component with FsmRx"](?path=/docs/2-creating-a-simple-traffic-light-component-with-fsmrx--docs))
     correctly cycles between its <b>"go"</b>,<b>"prepareToStop"</b> and <b>"stop"</b> states. 
-    The inner workings of this component are relatively straightforward. Upon each <code>changeState</code> transition, the duration required to remain in the state is used to create an <b>RxJS</b> <code>timer</code>.  
+    The inner workings of this component are relatively straightforward. Upon each <code>changeState</code> transition, the duration required to remain in the state is used to create an <b>RxJS</b> <code>timer</code>.
     At the completion of this timer, the FSM initiates a transition to the next state and the cycle repeats indefinitely. This cycle is initiated in the <code>ngAfterViewInit</code> function via the first <code>changeState</code> request.</p>
 
     <p>Despite this component's relative simplicity, testing self-initiating FSMs can be challenging.
     During the <b>Run</b> phase the <code>TestScheduler</code> will subscribe to the SUT observable and monitor its outputs using the <code>expectObservable</code> function.
     If the SUT is already emitting values when the <code>expectObservable</code> function is called the <code>TestScheduler</code> will not correctly identify the <code>timer</code> intervals and will immediately finish.</p>
     
-    <p>To solve this we can delay the execution of <code>ngAfterViewInit</code> until after we have subscribed to our SUT observable, by moving the <code>fixture.detectChanges();</code> out of the <code>beforeEach</code> function and into a <code>testScheduler</code> scheduled event.
-    This event can be scheduled at any time we desire, however, if we wish to capture the initial <b>"FSMInit"</b> state it should not scheduled at 0.</p>
+    <p>To solve this, the execution of <code>ngAfterViewInit</code> is delayed until after subscription to the SUT observable, by moving <code>fixture.detectChanges();</code> out of the <code>beforeEach</code> function and into a <code>testScheduler</code> scheduled event.
+    This event can be scheduled at any desired time, however, to capture the initial <b>"FSMInit"</b> state it should not scheduled at 0.</p>
     
     <p>When testing <b>FsmRx</b> services you may need to come up with additional strategies to solve these race conditions.
     As such it may be useful to extend the SUT to expose it's initialization functions for use in <code>testScheduler.schedule</code> events.</p>
@@ -876,12 +877,12 @@ import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
 
   
     <p>The defined events are executed using the <code>testScheduler.run</code> function which is also used to assert that the SUT's <code>stateData$</code> observable stream emits the correct expected values.
-    Given the events scheduled, it is expected that the SUT observable will transition from <b>"FSMInit"</b> -> <b>"Go"</b> -> <b>"prepareToStop"</b> -> <b>"stop"</b> -> <b>"Go"</b> before completing,  
-    waiting at each state for 1ms, 7seconds, 3seconds, 10seconds and 1ms. 
+    Given the events scheduled, it is expected that the SUT observable will transition from <b>"FSMInit"</b> -> <b>"Go"</b> -> <b>"prepareToStop"</b> -> <b>"stop"</b> -> <b>"Go"</b> before completing,
+    waiting at each state for 1ms, 7seconds, 3seconds, 10seconds and 1ms respectively. 
     This timeline can be represented in the marble diagram <code>'a b 6999ms c 2999ms d 9999ms e |'</code>.
     As the intervals between emissions are quite long they are defined using ms values, as representing each frame with dashes would require thousands of characters.</p>
 
-    <p>Finally to execute this test assertion this marble diagram is passed into the <code>toBe</code> operator returned by the <code>expectObservable</code> function along with an object that describes the data expected to be emitted.</p> 
+    <p>Finally to execute this test assertion, this marble diagram is passed into the <code>toBe</code> operator returned by the <code>expectObservable</code> function, along with an object that describes the data expected to be emitted.</p> 
   
     ```ts
     describe('TrafficLightSimpleComponent', () => {
