@@ -1,65 +1,36 @@
-name: 'Deploy Storybook to GitHub Pages'
-description: 'Build and deploy storybook code to GitHub pages'
-branding:
-  icon: upload-cloud
-  color: red
-inputs:
-  checkout:
-    description: 'Specifies if this action should checkout the code'
-    required: false
-    default: 'true'
-  path:
-    description: 'Specifies the path of the static assets after building'
-    required: false
-    # TODO: where does storybook output by default?
-    default: 'dist/storybook'
-  install_command:
-    description: 'Specifies the command to run the installation.'
-    required: false
-    default: 'npm ci'
-  build_command:
-    description: 'Specifies the command to run after npm ci for the build'
-    required: false
-    default: 'npm run build-storybook'
-outputs:
-  page_url:
-    description: "The URL of the page"
-    value: ${{ steps.deploy.outputs.page_url }}
+# This is a basic workflow to help you get started with Actions
 
-runs:
-  using: 'composite'
+name: CI
 
-  steps:
-    - name: Checkout if required
-      if: ${{ inputs.checkout == 'true' }}
-      uses: actions/checkout@v4
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
-    - name: 'Build'
-      shell: bash
-      run: |
-        echo "::group::Build"
-        ${{ inputs.install_command }}
-        ${{ inputs.build_command }}
-        echo "::endgroup::"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
-    - name: 'upload'
-      uses: actions/upload-pages-artifact@v3
-      with: 
-        path: ${{ inputs.path }}
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
 
-    - id: deploy
-      name: Deploy to GitHub Pages
-      uses: actions/deploy-pages@v4
-      with:
-        token: ${{ github.token }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
 
-    - name: Print footer
-      shell: bash
-      run: |
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "# Made by  [![Bitovi](https://www.bitovi.com/hubfs/limbo-generated/imgs/logos/bitovi-logo-23.svg)](https://bitovi.com)" >> $GITHUB_STEP_SUMMARY
-        echo ""  >> $GITHUB_STEP_SUMMARY
-        echo "Check the rest of our actions in the [GitHub Marketplace](https://github.com/marketplace?category=&type=actions&verification=&query=bitovi)!"  >> $GITHUB_STEP_SUMMARY
-        echo ""  >> $GITHUB_STEP_SUMMARY
-        echo "You can get help or ask questions on our [Discord Channel](https://discord.gg/zAHn4JBVcX), or set up a free consultation on our [platform engineering website](https://www.bitovi.com/services/devops-consulting/platform-engineering)." >> $GITHUB_STEP_SUMMARY
-   
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
