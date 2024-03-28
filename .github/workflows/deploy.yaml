@@ -26,8 +26,6 @@ outputs:
     description: "The URL of the page"
     value: ${{ steps.deploy.outputs.page_url }}
 
-  
-
 runs:
   using: 'composite'
 
