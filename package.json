@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "storybook": "ng run ngx-fsm-rx-examples:storybook",
-    "build-storybook": "ng run ngx-fsm-rx-examples:build-storybook",
+    "build-storybook": "ng run ngx-fsm-rx-examples:build-storybook --output-dir ./docs",
     "clean:node-modules": "if exist node_modules rd /s /q node_modules",
     "reinstall": "npm run clean:node-modules && npm i"
   },
