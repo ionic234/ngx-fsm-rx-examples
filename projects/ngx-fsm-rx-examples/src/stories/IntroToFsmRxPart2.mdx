@@ -1,0 +1,625 @@
+import { Meta } from "@storybook/blocks";
+import literalTypeErrors from "./assets/part2/literal-types-errors.png";
+import trafficLightSimpleStateDiagram from "./assets/part2/traffic-light-simple-state-diagram.svg";
+import trafficLightSimpleGoState from "./assets/part2/traffic-light-simple-go-state.png"
+import changeStateTypeParameter from"./assets/part2/change-state-type-parameter.png";
+
+<Meta title="2. Creating a Simple Traffic Light component with FsmRx" /> 
+
+<article>
+  <h1>Creating Finite State Machines with FsmRx</h1>
+  <hr />
+  <h2>Part 2: Creating a Simple Traffic Light component with FsmRx</h2>
+  
+  <p>In this article we will learn how to build a Simple Traffic Light component using <b>FsmRx</b>. 
+  Specifically, we will be using the <b>Angular</b> wrapper <b>NgxFsmRx</b>, which contains the required base functionality to define <b>Angular</b> injectables, services and components.
+  <b>FsmRx</b> can be added to an <b>Angular</b> project of version 16 and above using the following command: </p> 
+
+  ```shell
+  ng add ngx-fsm-rx
+  ``` 
+
+  <p><i>Disclaimer: These articles include examples intended to showcase the functionalities of <b>FsmRx</b> rather than accurately depict real-world traffic control systems. 
+  The choice of traffic lights as examples is based on their widespread familiarity. 
+  Actual traffic control systems are significantly more complex than the simplified illustrations provided in this documentation.</i></p>  
+
+  <p>This <b>"ngx-fsm-rx-examples"</b> project takes advantage of <b>Storybook</b>, a front-end code playground for previewing and experimenting with front-end components.
+  <b>Storybook</b> provides a web interface where the completed example components can be viewed. 
+  In the vernacular of <b>Storybook</b>, these examples are presented as stories. 
+  Stories allow for the setting of an <b>FsmRxComponent</b> inputs and default values through the use of <code>arg</code> controls, facilitating testing, experimentation and prototyping.</p>
+
+  <p>Inside <b>Storybook</b> we can also take advantage of an <b>NgxFsmRx</b> component called <b>FsmRxDebugSetComponent</b>. 
+  This component wraps <b>FsmRxComponents</b>, providing state diagrams and changelogs for use in the test environment.
+  The use of <b>FsmRxDebugSetComponent</b> will be discussed further in ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs).</p>
+
+  <div class="breakout-box examples">
+    <p>The complete code for the following ["Traffic Light Simple"](?path=/story/examples-1-traffic-light-simple--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-simple"</b>.</p>
+  </div>
+
+  <h3>Defining FSM states</h3>  
+
+  <p>The first step to creating any <b>FsmRx</b> derived class, is to identify and define the states that the FSM can be in. 
+  As previously discussed, a simple three-light traffic light can be in one of three states at any given time. These states are <b>"go"</b>, <b>"prepareToStop"</b> and <b>"stop"</b>.
+  In <b>FsmRx</b> classes these states are defined as a union of string literals: </p>
+  
+  ```typescript
+
+  type TrafficLightStates = "go" | "prepareToStop" | "stop";
+  ```
+
+  <p>While you are free to name your states almost anything you want, <b>FsmRx</b> reserves two state names for internal use only. These restricted states are <b>"FSMInit"</b> and <b>"FSMTerminate"</b>.
+  <b>"FSMInit"</b> is the state that <b>FsmRx</b> will initialise in. This state cannot be provided with custom data, and it is not possible to re-enter once it has been left. <b>"FSMTerminate"</b> represents the final state in a Terminating FSM.
+  A key rule of <b>FsmRx</b> is that every state must define at least one other state they can transition to. While it is not possible to transition to the <b>"FSMTerminate"</b> state, it is required to designate a state as the final state in an FSM. 
+  <b>"FSMTerminate"</b> has no meaning if it is not the only state that can be transitioned to. If you try to use either <b>"FSMInit"</b> or <b>"FSMTerminate" </b> as a name for your custom states <b>TypeScript</b> will error unless they are removed. </p>
+
+  <div className="breakout-box">
+    
+    <h3>What is a Literal Type?</h3>
+    
+    <p>A literal type is a type that represents a fixed value rather than a general classification of data. Take the following examples:</p>
+    
+    ```ts
+    const anyNumber: number = 1000 //accepts any valid number value
+    const fixedNumber: 3000 = 3000 //only accepts the number 3000
+
+    const anyString: string = "hello" //accept any valid string value
+    const fixedString: "world" = "world" //only accept the string world
+    ```
+    
+    <p>Literal types ensure that a property/variable can only be assigned specific data. Attempting to assign an invalid value will throw an error, for example: </p>
+    
+    <figure>
+      <div>
+        <img src={literalTypeErrors} alt="Literal type errors" />
+      </div>
+    </figure>
+
+    <p>Literal types are not restricted to just one value. With the use of unions, literal types can define a set of valid values that can be assigned to the property/variable:</p>
+    
+    ```ts
+    const fixedNumber: 1000 | 2000 | 3000 = 3000 //only accepts the numbers 1000, 2000 or 3000
+    const fixedString: "hello" | "world" = "world" //only accepts the strings "hello" or "world"
+    ```
+
+    <p>Literal types greatly improve type safety and enable a feature called type narrowing, which is discussed further in ["Part 4: Reacting to user input"](?path=/docs/4-reacting-to-user-input--docs).</p>
+  
+  </div>
+
+  <h3>Defining FSM State Data</h3>  
+
+  <p>With the FSMs state union established, the next step is to define an object type to describe the data associated with each state.</p>
+
+  <p>A key feature of FSMs is that each state has access to its own unique dataset, which in <b>FsmRx</b> is referred to as <code>stateData</code>.
+  This <code>stateData</code> includes the specific state they represent, along with any necessary additional variables.
+  Different states <code>stateData</code> may be very similar, only varying in just their state value, or define data unique to their particular state.
+  For a state transition to occur, it must be provided with the correct <code>stateData</code> object.</p>
+
+  <p>For this traffic light example, each state requires access to the same data - the name of the state and an object containing numerical literals that specify the duration the system remains in any given state.</p> 
+  
+  <p>In <b>FsmRx</b> it is a requirement that <code>stateData</code> objects are strongly typed through the use of object types. 
+  These type objects contain any data required by the FSM states but must also define the property <code>state</code> typed as the FSMs state union. 
+  This can be achieved manually or by extending <code>BaseStateData</code>, which is a generic type that takes the FSMs state union as its parameter and uses it to define the required <code>state</code> property.</p>
+
+  <p>For this traffic light commponent the <code>stateData</code> type is defined as follows:</p> 
+  
+ ```typescript
+  type TrafficLightTimings = {
+    go: 7000,
+    prepareToStop: 3000,
+    stop: 10000;
+  };
+
+  interface TrafficLightData extends BaseStateData<TrafficLightStates> {
+    trafficLightTimings: TrafficLightTimings; 
+  }
+  ```
+  
+  <p>More complex <code>stateData</code> definitions, where states require access to unique data will be discussed in ["Part 4: Reacting to user input"](?path=/docs/4-reacting-to-user-input--docs).</p>
+
+  <h3>Defining FSM State Transitions</h3>  
+  
+  <p>The final required type is an object type, which contains an entry for each of the states, including <b>"FSMInit"</b>, describing the states that they can leave to.</p>
+  
+  ```typescript
+  type TrafficLightCanLeaveToMap = {
+    FSMInit: "go",
+    go: "prepareToStop",
+    prepareToStop: "stop",
+    stop: "go";
+  };
+  ```
+  <p>The above type defines a circular FSM that starts at <b>"FSMInit"</b> before traversing to <b>"go"</b> where it loops indefinitely around the standard traffic light sequence of <b>"go"->"prepareToStop"->"stop"->"go"</b>.</p> 
+
+  <figure>
+    <div>
+      <img src={trafficLightSimpleStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 30px 100px 20px', width: '170px' }} />
+      <figcaption>The state diagram resulting from the <code>TrafficLightCanLeaveToMap</code> definition.</figcaption>
+    </div>
+  </figure>
+
+  <p>As previously stated, all states must transition to at least one other state. If a state is not defined in this object type then <b>FsmRx</b> will determine that it can leave to all other states.
+  <b>FsmRx</b> also will generate type errors when it identifies orphan states, which are states that no other state can leave to. 
+  This structure is enforced via both compile-time type checking and <b>RxJS</b> filters executed at runtime.</p>
+  
+  <h3>Extending FsmRx Classes</h3>
+
+  <p>These types can now be incorporated into the component class declaration by extending the abstract class <b>FsmRxComponent</b> and passing them in as type parameters.</p>
+  
+  ```typescript 
+  export class TrafficLightSimpleComponent extends FsmRxComponent<
+    TrafficLightStates,
+    TrafficLightData,
+    TrafficLightCanLeaveToMap
+  > implements AfterViewInit {
+    ...
+  }
+  ```
+  
+  <div className="breakout-box">
+    <h3>Why Inheritance Instead of Composition?</h3>
+    <p>There is a generally accepted maxim in software development that composition should be favoured over inheritance. 
+    While this is true for most scenarios, the requirements of <b>FsmRx</b> mean it is better suited to the inheritance model.</p>
+    <p>The compositon over inheritance philosophy favours a <b>has-a</b> approach over an <b>is-a</b> approach. 
+    However this doesn't fit with <b>FsmRx</b> derived classes as they don't have an FSM, they are an FSM. 
+    All of the states and data used to control an FSM belong to the class itself not a third party. 
+    Adopting a <b>has-a</b> design would mean classes lose control of their own data.</p>
+    <p>An inheritance-based approach also comes with a few benefits:</p>  
+    <ol>
+      <li><b>Framework Agnostic</b>: As the core <b>FsmRx</b> module is designed to be framework agnostic it was necessary to avoid all framework-specific boilerplate. 
+      As different frameworks have different requirements for composition it would be difficult to support at the core level.</li>
+      <li><b>Simplicity</b>: The use of abstract properties to enforce the declaration of required properties is arguably simpler than setting up providers for multiple instances of the same service.</li>
+      <li><b>Custom Overrides</b>: Inheritance allows for easier overriding of functions to provide bespoke logic. This is especially useful for extending <b>FsmRx's</b> default diagram logic.</li>
+      <li><b>Storybook Integration </b>: <b>FsmRxComponent</b> exposes several functions that allow <b>Storybook</b> to display state diagrams and logging tools.
+       If composition was used these functions would have to be manually exposed for every <b>FsmRxComponent</b> subclass.</li>
+    </ol>
+    <p>A compositional approach could be taken by extending <code>FsmRxInjectable</code> or <b>FsmRxComponent</b> into a service, but this has the potential to create more problems than it would solve.</p>
+  </div>
+
+  <p>When extending an <b>FsmRx</b> class, it is a requirement that a constructor is defined. 
+  This constructor can take in two optional parameters that are used to configure the FSM, <code>fsmConfig</code> and <code>isInDevMode</code>.
+  The <code>fsmConfig</code> parameter allows for the configuring of <b>fsmRx</b> features and will be discussed further in ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs). 
+  The <code>isInDevMode</code> parameter forces <b>fsmRx</b> to run as if it were in either a development or production environment.
+  For the following example components, however, the default constructor is sufficient.
+  All <b>fsmRx</b> constructors must call <code>super()</code> for the FSMs to correctly initialize.</p> 
+
+  ```typescript 
+   public constructor() {
+    super();
+  }
+  ```
+
+  <h3>Defining State Metadata via the <code>stateMap</code> property</h3>
+
+  <p>All classes that extend <b>FsmRx</b> must define the abstract property <code>stateMap</code>. This <code>stateMap</code> property acts as the DNA of an FSM and defines the metadata for every state.
+  This metadata is comprised of two mandatory properties <code>canEnterFromStates</code> and <code>canLeaveToStates</code> and three optional lifecycle hooks: <code>onEnter</code>, <code>onLeave</code> and <code>onUpdate</code>.</p>
+
+  <p>As typing information is only available during development and at compile time, it is a requirement to replicate the <code>TrafficLightCanLeaveToMap</code> into <b>JavaScript</b> properties that are available at runtime.
+  This is done through the declaration of the <code>canEnterFromStates</code> and <code>canLeaveToStates</code> objects. 
+  These are strongly typed objects that ensure an entry for each valid state is present. 
+  The values assigned to these state keys are insignificant and have been typed as the boolean literal <code>true</code>. 
+  In <b>VS Code</b>, you can utilize the shortcut <code>ctrl+space</code> to promptly define these objects using the <b>IntelliSense</b> menu.</p>    
+  
+  ```typescript
+  protected override stateMap: StateMap<
+    TrafficLightStates,
+    TrafficLightData,
+    TrafficLightCanLeaveToMap
+  > = {
+      go: {
+        canEnterFromStates: { FSMInit: true, stop: true },
+        canLeaveToStates: { prepareToStop: true },
+      },
+      prepareToStop: {
+        canEnterFromStates: { go: true },
+        canLeaveToStates: { stop: true },
+      },
+      stop: {
+        canEnterFromStates: { prepareToStop: true },
+        canLeaveToStates: { go: true },
+      }
+    };
+  ```
+
+  <h3>Using FsmRx in a Component Template</h3>
+
+  <p>As <b>FsmRx</b> is built upon <b>RxJS</b> access to the state data can be gained through the use of the async pipe. 
+  For this purpose, <b>FsmRx</b> exposes an observable called <b>stateData$</b> which provides the data for the current state. 
+  This acts similarly to a <code>ViewBag</code> in <b>ASP</b> and greatly simplifies component templates.</p>
+
+  <p>The traffic light <b>HTML</b> template contains a list of three items, each representing a light on the traffic light. 
+  The <b>state</b> property of the <b>stateData</b> observable is used in combination with <code>ngClass</code> to apply the <b>"on"</b> class to the light that corresponds to the FSMs current state.</p> 
+  
+  ```html
+  <div class="traffic-light-housing"
+    *ngIf="stateData$ | async as stateData">
+    <ul>
+      <li>
+        <span class="red"
+          [ngClass]="{'on':stateData.state === 'stop'}"></span>
+      </li>
+      <li>
+        <span class="amber"
+          [ngClass]="{'on':stateData.state === 'prepareToStop'}"></span>
+      </li>
+      <li>
+        <span class="green"
+          [ngClass]="{'on':stateData.state === 'go'}"></span>
+      </li>
+    </ul>
+  </div>
+  ```
+
+  <p>In the <b>CSS</b> these lights have a filter applied to them which makes them appear off. 
+  When the <b>"on"</b> class is applied, the brightness of this filter is set to 1 making them appear as if they were on. 
+  The <b>CSS</b> is outside the scope of this article but can be viewed in the <b>"ngx-fsm-rx-examples"</b> project of the <b>NgxFsmRx</b> repository.</p>
+
+  <h3>Transitioning to the first State</h3>
+
+  <p>As an <b>FsmRx</b> FSM will always start in the dataless <b>"FSMInit"</b> state, the first task is to change the state to a valid custom FSM state. 
+  This can either be done in the class constructor or as part of an <b>Angular</b> initialisation lifecycle hook. 
+  When creating a <b>FsmRxComponent</b> it is advisable to use the hook <code>ngAfterViewInit</code> as the assigned <code>@Input</code> values will be available, reducing the need to update the state in <code>ngOnChanges</code>. 
+  This also helps with <b>Storybook</b> integration (see ["Part 5: Debugging FsmRxComponents using Storybook"](?path=/docs/5-debugging-fsmrxcomponents-using-storybook--docs)) as <code>arg</code> defaults are also assigned before this hook is called.</p>
+
+  <p>While it is not strictly necessary, it is always recommended to be in the <b>FsmRx</b> context when executing any FSM transition. 
+  The program is said to be in the <b>FsmRx</b> context when it has access to the current state's information data. 
+  The <code>currentState$</code> getter is used to enter the <b>FsmRx</b> context from outside of the <code>OnEnter</code>, <code>OnLeave</code> or <code>OnUpdate</code> lifecycle hooks.
+  This method returns an observable that emits the <code>CurrentStateInfo</code> of the current state before completing.</p>
+
+  ```ts
+  public override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    this.currentState$.subscribe((currentStateInfo: CurrentStateInfo<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) => {
+      ...
+    });
+  }
+
+  ```
+  <p>Being in the <b>FsmRx</b> context provides certainty of the current state and gives more accurate code-hinting.
+  This helps to prevent potential rejections from being triggered by unauthorized state transitions.
+  Using <code>CurrentStateInfo</code> also helps to make your intentions more explicit and understandable.</p>
+
+  <p>With the <b>FsmRx</b> context established, the current state is used to test that the FSM is in the expected <b>"FSMInit"</b> state. 
+  If it is then the state can be changed to the desired <b>"go"</b> state.
+  This is done by calling the <code>changeState</code> function, passing in the required data.</p>
+  
+  ```typescript 
+  this.currentState$.subscribe((currentStateInfo: CurrentStateInfo<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) => {
+    const { state } = currentStateInfo;
+    if (state === "FSMInit") {
+      this.changeState<FSMInit>({ state: "go", trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } });
+    }
+  });
+  ```
+
+  <p>As part of this change state request, the transition is checked to ensure it is valid. 
+  If the transition is rejected the FSM will remain in its current state and an optional warning may be logged to the console.
+  If the transition is successful, the traffic light will advance to its <b>"go"</b> state and look like this: </p>
+
+   <figure>
+    <div>
+      <img src={trafficLightSimpleGoState} alt="Traffic Light in Go State" style={{ paddingBottom: '40px' }} />
+      <figcaption>The traffic light in its <b>"go"</b> state.</figcaption>
+    </div>
+  </figure>
+
+  <p>The <code>changeState</code> function supports an optional type parameter that specifies the expected current state value within the FSM. 
+  When this type parameter is omitted, <code>changeState</code> permits data for any state within the FSM. 
+  However, when this parameter is provided, <code>changeState</code> utilizes the current state's entry in its <code>CanLeaveToMap</code> to confine the data to only valid states. 
+  This behaviour enhances <b>IntelliSense</b> functionality resulting in increased type safety while transitioning states.</p>
+
+  <figure>
+    <div>
+      <img src={changeStateTypeParameter} alt="changeState type parameter" />
+    </div>
+  </figure>
+
+  <h3>State Transition Lifecycle Hooks</h3>
+
+  <p><b>FsmRx</b> allows for the execution of custom code during <code>changeState</code> and <code>updateState</code> transitions via the use of lifecycle hooks.</p>
+  <p>These hooks are: </p>
+  <ul>
+    <li><code>onLeave</code>: Called first during <code>changeState</code> transitions, this hook is used to handle the teardown operations specific to the state you're leaving. 
+    It is where tasks such as cancelling timers, unbinding events, or any other necessary cleanup operations are performed before moving to the next state.</li>
+    <li><code>onEnter</code>: This hook is called last during <code>changeState</code> transitions and is used to perform any necessary buildup logic for the state being entered. 
+    This could involve activities like initialising timers, binding events, making API calls, or any other actions needed to prepare for the new state.</li>
+    <li><code>onUpdate</code>: is used to perform any required side effects during <code>updateState</code> transitions such as playing animations, sounds and triggering events.</li>
+  </ul>
+ 
+  <p>These hooks receive a state change data argument that describes the current transition. 
+  They are called <code>OnLeaveStateChanges</code>, <code>OnEnterStateChanges</code> and <code>OnUpdateStateChanges</code>  and are typed as follows:</p>
+
+  ```typescript
+  OnLeaveStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>
+  OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>
+  OnUpdateStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>
+  ```
+
+  <p>These data types contain the hook they relate to and properties to describe the before and after states of the transition. 
+  For <code>OnLeaveStateChanges</code> and <code>OnEnterStateChanges</code> these properties are called <code>leavingStateInfo</code> and <code>enteringStateInfo</code> while for <code>OnUpdateStateChanges</code> they are named <code>previousInfo</code> and <code>updateInfo</code>.
+  Regardless of name, they each contain the following properties:</p>
+
+  <ul>
+    <li><b>state</b>: The string literal of the state the info relates to.</li>
+    <li><b>stateData</b>: The data relevant to this state.</li>
+    <li><b>canLeaveTo</b>: An array of the states this state can leave to</li>
+    <li><b>canUpdate</b>: A boolean value that declares whether the state can be updated or not. This value is always true except for the <b>"FSMInit"</b> state.</li>
+  </ul>
+
+  <p>This gives access to all the data required to control the flow of the FSM.</p>
+
+  <p>These lifecycle hooks are specified within the <b>stateMap</b> and can be represented as either an inline function or method calls.</p>
+
+  <h3>Defining an onEnter Hook for the Traffic lights "go" State</h3>
+
+  <p>Having successfully transitioned to the <b>"go"</b> state, the next step is to determine the duration for how long the FSM should remain in this state before transitioning to the next.
+  This can be done by leveraging the <b>"go"</b> states <b>"onEnter"</b> lifecycle hook in the following manner:</p>
+
+  ```ts
+  protected override stateMap: StateMap<
+    TrafficLightStates,
+    TrafficLightData,
+    TrafficLightCanLeaveToMap
+  > = {
+      go: {
+        ...
+        onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
+          ...
+        }
+      },
+      ...
+    };
+  ```
+
+  <p>The duration to wait in this state can be determined by consulting the <code>trafficLightTiming</code> property of the state data. 
+  As previously mentioned, this data can be retrieved from the <code>OnEnterStateChanges</code> argument either directly or via object destructuring:</p> 
+  ```ts
+  onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
+    const trafficLightTimings = onEnterStateChanges.enteringStateInfo.stateData.trafficLightTimings
+  }
+  ```
+  <p>or</p>
+  ```ts
+  onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
+    const { enteringStateInfo } = onEnterStateChanges;
+    const { stateData } = enteringStateInfo;
+    const { trafficLightTimings } = stateData;
+  }
+
+  ```
+
+  <p>This <b>"go"</b> state timing data is supplied to the <b>RxJS</b> <code>timer</code> function.
+  This function returns an observable that waits for the specified period before emitting and completing. 
+  Subscribing to this emission allows the <code>changeState</code> function to be called, advancing to the <b>"prepareToStop"</b> state after the specified delay.
+  Given that all states share identical data, the spread operator can be used to supply this function with the current <code>stateData</code>, altering only the state property to reflect the desired next state.
+  As the timer observable automatically completes after emitting, there is no need for an <code>onLeave</code> cleanup function to handle unsubscribing or any other cleanup operations.</p>
+
+  ```typescript
+  onEnter: (onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, "go", TrafficLightData, TrafficLightCanLeaveToMap>) => {
+    const { enteringStateInfo } = onEnterStateChanges;
+    const { stateData } = enteringStateInfo;
+    const { trafficLightTimings } = stateData;
+
+    timer(trafficLightTimings["go"])
+      .subscribe(() => {
+        this.changeState<"go">({
+          ...stateData,
+          state: "prepareToStop"
+        });
+      });
+  }
+  ```
+
+  <h3>Finalising the Simple Traffic Light component</h3>
+
+  <p>Finally all that is required to complete the traffic light component is to write the hook logic for the other two states.
+  While it would be possible to create a change state function for each required state, this would be quite redundant as each state performs the exact same steps. 
+  They are:</p>
+  
+  <ol>
+    <li>Extract the current state duration from the <code>TrafficLightTimings</code> property.</li>
+    <li>Create a timer to wait for this duration.</li>
+    <li>Transition to the next state in the chain.</li>
+  </ol>
+
+  <p>This can be achieved by updating the code to use a method call, rather than an inline function, and applying it to all of the states <code>OnEnter</code> hooks.
+  For this purpose, the <code>OnEnterStateChanges</code> type accepts a union of states as its second type parameter allowing it to represent multiple types of state data.</p> 
+  
+  ```typescript
+  protected override stateMap: StateMap<
+    TrafficLightStates,
+    TrafficLightData,
+    TrafficLightCanLeaveToMap
+  > = {
+      go: {
+        ...
+        onEnter: this.handleEnterState
+      },
+      prepareToStop: {
+        ...
+        onEnter: this.handleEnterState
+      },
+      stop: {
+        ...
+        onEnter: this.handleEnterState
+      }
+    };
+  
+    private handleEnterState(
+      onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>
+    ): void {
+      ...
+    }
+
+  ```
+  <p>To successfully transition to the next state, two pieces of data are required: the current state and the intended next state.
+  The <code>enteringStateInfo</code> contains the properties: <code>state</code>, representing the name of the upcoming new state, and
+  <code>canLeaveTo</code>, an array containing all the states to which a future transition is possible.</p>
+
+  <p>As each of the Simple Traffic Lights states can only exit to one other state, the first entry in the <code>canLeaveTo</code> array is the name of the destination state.</p>
+
+  ```typescript
+  private handleEnterState(
+    onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>
+  ): void {
+
+    const { enteringStateInfo } = onEnterStateChanges;
+    const { stateData, state, canLeaveTo } = enteringStateInfo;
+    const { trafficLightTimings } = stateData;
+
+    timer(trafficLightTimings[state])
+      .subscribe(() => {
+        this.changeState({
+          ...stateData,
+          state: canLeaveTo[0]
+        });
+      });
+  }
+  ```
+  <h3>Generating <b>FsmRxComponents</b> and <b>FsmRxServices</b> using Schematics</h3>
+
+  <p>To aid in the creation of FSMs, <b>NgxFsmRx</b> contains schematics to automate the production of the previously described types and configuration objects for both <b>FsmRxComponents</b> and <b>FsmRxServices</b>. 
+  These schematics support both long-form and shorthand command syntax as follows:</p>
+  
+  ```shell
+  ng generate ngx-fsm-rx:component
+  ng generate ngx-fsm-rx:service
+  ```
+  <p>or</p> 
+  ```shell
+  ng g ngx-fsm-rx:c
+  ng g ngx-fsm-rx:s
+  ```
+  
+  <p>Both schematics guide through the process of defining states, transition rules and lifecycle hooks, while also generating the necessary class, template and story files.</p> 
+  
+  <hr/>
+
+  <p>With this Simple Traffic Light component complete, you should have a good grasp of how to set up a basic FSM using FsmRx. 
+  In ["Part 3 Modifying an existing FSM"](?path=/docs/3-modifying-an-existing-fsm--docs) we examine a key benefit of the module approach utilized in FSMs by adding a fourth state, demonstrating how easy FSMs are to update, restructure and maintain.</p>
+
+</article>
+
+<style>
+  {`
+    h2{
+      border-bottom:none !important;
+    }
+
+    h3, h4{
+      text-align: center;
+      text-decoration:underline;
+    }
+
+    h4{
+      font-size: 20px !important;
+      margin: 16px 0 !important;
+    }
+
+
+    article p{
+      margin:10px;
+      font-size:16px!important;
+    }
+
+
+    sub{
+      line-height:0px;
+    }
+
+    img{
+      background-color:#fff;
+    }
+
+    ol, ul{
+      margin:0px 40px!important;
+    }
+
+    ol li,
+    ul li{
+      font-size:16px !important;
+    }
+
+    figure{
+        display:flex;
+        justify-content: center;
+        position:relative;
+        text-align: center; 
+        margin: 30px auto; 
+    }
+    
+    figure div{
+      display:flex;
+      position:relative;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    figure figcaption {
+        position:absolute;
+        bottom:0px;
+        left: 0px;
+        right: 0px;
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.65);
+        color:white;
+        font-size:14px;
+    }
+
+   
+    .breakout-box{
+      border: 2px solid #000; 
+      background-color: #dbe5f0;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      margin: 30px 100px;
+      overflow:hidden;
+    }
+
+    .breakout-box > * {
+      padding:0px 20px;
+    }
+
+    .breakout-box h3{
+      position:relative;
+      color:white;
+      padding: 10px 20px!important;
+      border-bottom: 1px solid #000;
+      margin:0px;
+      text-align: left;
+      background-color: #4f81bd;
+    }
+
+    .columns{
+      display:flex;
+      gap: 20px;
+    }
+
+    .breakout-box .columns{
+      align-items: center;
+    }
+
+    .columns figure{
+      flex: 0 0 auto;
+      margin: 0px;
+    }
+
+    .breakout-box ol,
+    .breakout-box ul{
+      margin: 16px 40px 22px!important;
+    }
+
+    .breakout-box .docblock-source{
+      margin:25px 20px 40px;
+    }
+
+    .breakout-box.examples{
+      margin:30px auto;
+      width: fit-content;
+    }
+
+    .breakout-box.examples p{
+      display: inline-block;
+      text-align: center;
+    }
+
+  `}
+</style>

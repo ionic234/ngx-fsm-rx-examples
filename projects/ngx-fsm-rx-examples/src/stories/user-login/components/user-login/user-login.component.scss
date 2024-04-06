@@ -1,0 +1,178 @@
+:host {
+
+    align-self: center;
+
+
+    p,
+    label,
+    input,
+    ul {
+        font-family: Arial,
+            Helvetica,
+            sans-serif;
+        font-size: 14px;
+        font-weight: normal;
+        margin: 0px;
+        padding: 0px;
+    }
+
+    ul {
+        font-size: 12px;
+        padding: 10px 0px 20px 22px;
+
+        &.hidden {
+            visibility: hidden;
+        }
+    }
+
+    .form-holder {
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #dbe5f0;
+        border: 1px solid #95b3d7;
+        border-radius: 4px;
+        width: 340px;
+        height: 150px;
+        box-sizing: border-box;
+
+        form {
+            display: grid;
+            grid-template-columns: 104px 214px;
+            padding: 6px 10px 10px;
+            overflow: hidden;
+            position: relative;
+
+            >* {
+                padding: 4px 0px;
+                align-self: center;
+            }
+
+            .locked,
+            .loading {
+                cursor: progress;
+                position: absolute;
+                top: 0px;
+                bottom: 0px;
+                left: 0px;
+                right: 0px;
+                background-color: rgba($color: #ffffff, $alpha: 0.4);
+            }
+
+            .locked {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: not-allowed;
+                color: red;
+                background-color: rgba($color: #000, $alpha: 0.2);
+
+                p {
+                    background-color: white;
+                    border: 2px solid black;
+                    border-radius: 4px;
+                    padding: 10px;
+                    font-weight: bold;
+                    font-size: 14px;
+                    text-align: center;
+                    margin-bottom: 12px;
+                    user-select: none;
+                }
+            }
+
+
+            p {
+                grid-column: 1/ span 2;
+                margin: 5px 0px 6px;
+            }
+
+            label {
+                text-transform: capitalize;
+                padding-right: 5px;
+                grid-column: 1;
+                margin: 0px 0px 6px 30px;
+            }
+
+            input[type="text"],
+            input[type="password"] {
+                grid-column: 2;
+                padding: 2px 5px;
+                margin: 0px 30px 5px 0px;
+                border: 1px solid #95b3d7;
+                border-radius: 2px;
+
+                &:focus-visible {
+                    border: 2px solid #95b3d7;
+                    outline: none;
+                    padding: 2px 4px;
+                }
+            }
+
+            .form-controls {
+                overflow: hidden;
+                grid-column: 2;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-end;
+
+                input[type="submit"] {
+                    align-self: flex-end;
+                    padding: 5px;
+                }
+
+                .error-message {
+                    flex: 1 0 0px;
+                    font-size: 12px;
+                    color: red;
+                    padding: 0px 5px 0px 0px;
+                    text-overflow: ellipsis;
+                    text-transform: lowercase;
+                    margin: 0px;
+
+                    &::first-letter {
+                        text-transform: capitalize;
+                    }
+                }
+            }
+
+            &.error {
+                label {
+                    color: red
+                }
+
+                input[type="text"],
+                input[type="password"] {
+                    border-color: red;
+                }
+
+                .form-controls {
+                    .error-message {
+                        display: block;
+                    }
+                }
+
+            }
+
+        }
+
+        .welcome {
+            text-align: center;
+
+            h1 {
+                font-family: Arial,
+                    Helvetica,
+                    sans-serif;
+                margin: 0px 0px 10px;
+            }
+
+            p {
+                margin-bottom: 10px;
+            }
+        }
+
+    }
+
+
+
+}

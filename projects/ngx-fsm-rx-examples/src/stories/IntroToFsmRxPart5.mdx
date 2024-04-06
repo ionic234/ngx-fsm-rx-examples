@@ -1,0 +1,1033 @@
+
+import { Meta } from "@storybook/blocks";
+import fsmRxDebugSetExample from "./assets/part5/fsm-rx-debug-set-example.png"
+import fsmConfigControl from "./assets/part5/fsm-config-control.png"
+import unwantedControls from "./assets/part5/unwanted-controls.png"
+import fsmConfigDeepControls from "./assets/part5/fsm-config-deep-controls.png"
+import fsmConfigOverrideControls from "./assets/part5/fsm-config-override-controls.png"
+import userLoginError from "./assets/part5/user-login-error.png"
+import exampleStoriesMenu from "./assets/part5/example-stories-menu.png"
+
+<Meta title="5. Debugging FsmRxComponents using Storybook" /> 
+
+<article>
+  <h1>Creating Finite State Machines with FsmRx</h1>
+  <hr />
+  <h2>Part 5: Debugging FsmRxComponents using Storybook</h2>
+  
+  <p>During component development it can often be useful to execute code for validation, debugging and experimentation purposes. 
+  Yet, testing components within an application environment can be time-consuming, especially when they're not readily accessible on the main page.
+  Functionality hidden behind login screens or embedded in complex user journeys poses particular challenges for efficient testing.</p>
+
+  <p>To speed up development FsmRx has been designed to work with <a href = "https://storybook.js.org/docs/get-started/why-storybook" target="_blank">Storybook</a>, a frontend playground built for the rapid testing of components in isolation.</p>
+
+  <div class="breakout-box examples">
+    <p>The complete code for the following ["Traffic Light Overridable"](?path=/story/examples-6-traffic-light-overridable--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-overridable"</b>.</p>
+  </div>
+
+  <h3>Defining a Storybook Story</h3>
+
+  <p>To display a component in <b>Storybook</b> a special config file known as a <b>Story</b> with the extension ".stories.ts" is required.
+  These stories are written in <b>Component Story Format (CSF)</b> and allow for the configuration of components for use within the <b>Storybook</b> playground, while also defining metadata such as its title and any arguments or inputs it accepts.</p>
+
+  <p>Below is the bare minimum required to configure a story for the <b>TrafficLightOverridableComponent</b>. 
+  It gives the component a human-readable title as well as exporting the <code>Meta</code> and <code>Story</code> properties required for rendering the component in the playground.</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    title: 'Examples/6. Traffic Light Overridable',
+    component: TrafficLightOverridableComponent
+  }
+
+  export default meta;
+  type Story = StoryObj<TrafficLightOverridableComponent>;
+
+  export const Default: Story = {};
+  ```
+  <p>The <code>Meta</code> property is used to configure the controls, interactions and default arguments/inputs of a given component class, while the <code>Story</code> property is used to configure an individual component use case.</p>
+    
+  <h3>Defining Component Decorators Using the <code>Meta</code> Property</h3>
+
+  <p>While the previous story example is sufficient for simple use cases, more complex components often rely on external code dependencies and other components.
+  They may import common functionality from third-party libraries, incorporate subordinate child elements within their <b>HTML</b> templates or be enclosed by a parent component.</p>
+
+  <p>A <code>decorators</code> section can be added to a stories <code>Meta</code> to wrap components with additional functionality or styling.
+  Inside <code>decorators</code> a <code>moduleMetadata</code> parameter is defined for importing external modules and declaring child component dependencies.
+  This <code>moduleMetadata</code> is analogous to <b>Angular's</b> <code>NgModule</code> declarations.</p>
+  
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    decorators: [
+      moduleMetadata({
+          imports: [CommonModule],
+          declarations: [ChildComponent],
+      }),
+    ],
+  };
+  ```
+
+  <p>A <code>componentWrapperDecorator</code> function can also be defined in this <code>decorators</code> section to wrap components in additional <b>HTML</b>.</p>
+    
+  ```ts
+    const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    decorators: [
+      componentWrapperDecorator((story: string) => {
+        return `<wrapper-component>${story}</wrapper-component>`;
+      })
+    ],
+  };
+  ```
+
+  <h3>Displaying Default FsmRx Debug Information</h3>
+
+  <p><b>FsmRx</b> contains a helpful wrapper component called <b>FsmRxDebugSetComponent</b>. 
+  This component automatically hooks into an <b>FsmRxComponents</b> <code>outputDebugLog</code> and <code>outputStateDiagramDefinition</code> outputs to render a State Diagram of its FSM transitions as well as a configurable debug log.</p>
+  
+  <figure>
+    <div>
+      <img src={fsmRxDebugSetExample} alt="fsm-rx-debug-set wrapping the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
+      <figcaption>The state diagram and debug log provided by wrapping the <b>TrafficLightOverridableComponent</b> in an <b>FsmRxDebugSetComponent</b>.</figcaption>
+    </div>
+  </figure>
+
+  <p>To configure a story to use the <b>FsmRxDebugSetComponent</b> it must be added, along with its children, to the <code>Meta.decorators.moduleMetadata</code> property:</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    decorators: [
+      moduleMetadata({
+          declarations: [FsmRxDebugLogComponent, FsmRxStateDiagramComponent, FsmRxDebugSetComponent],
+          imports: [CommonModule],
+      }),
+    ]
+  }
+  ```
+
+  <p>To ensure proper rendering of the <b>FsmRxDebugSetComponent</b> it's essential to update the target <b>FsmRxComponents</b> element to include the <code>#fsmRxComponent</code> template reference variable. 
+  This reference is necessary for the <b>FsmRxDebugSetComponent</b> to interface with the target <b>FsmRxComponent</b> and bind to its outputs. </p>
+  
+  <p>The target <b>FsmRxComponents</b> template is provided as the first argument to the <code>componentWrapperDecorator</code> function in the form of a standard <b>HTML</b> tag string. 
+  This allows for modification with any string transformation function. </p>
+  
+   ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    decorators: [
+      ...
+      componentWrapperDecorator((story: string) => {
+          story = story.replace(">", " #fsmRxComponent>");
+          return `<fsm-rx-debug-set [debugLogKeys]="['state', 'stateTimeoutId']">${story}</fsm-rx-debug-set>`;
+      }, {})
+    ]
+  }
+  ```
+  <p>The <b>FsmRxDebugSetComponent</b> supports the input parameter <code>debugLogKeys</code>, which is an array of state data properties to include in the <b>"Transition Data"</b> column of the debug log. 
+  This allows for easy configuration of the data to be displayed.
+  If omitted only the <code>state</code> property is displayed. </p>
+  
+  <h3>Customizing FsmRxComponents via FsmConfig Objects</h3>
+
+  <p>The behavior of <b>FsmRx</b> classes can be configured by providing a config object via their constructors. Additionally, <b>FsmRxComponents</b> can accept this config through a <code>fsmConfig</code> input.
+  Many of these options affect what data is logged and emitted, making them useful for debugging with the <b>FsmRxDebugSetComponent</b>.</p> 
+   
+  <p>The following table documents the available configuration options:</p> 
+
+  <table>
+    <thead>
+      <tr>
+        <th>Property name</th>
+        <th>Description</th>
+        <th>Dev Default</th>
+        <th>Prod Default</th>
+        <th>Special Considerations</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>debugLogBufferCount</td>
+        <td>Number of entries to store in the debug log buffer.</td>
+        <td>Infinity</td>
+        <td>0</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>filterRepeatUpdates</td>
+        <td>If attempts to update a state with identical data to its current values trigger the FsmRx pipeline or is filtered out.</td>
+        <td>true</td>
+        <td>true</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>stateOverride</td>
+        <td>An object used to override the state of an FSM or false.</td>
+        <td>false</td>
+        <td>false</td>
+        <td>Only writable in dev mode.</td>
+      </tr>
+      <tr>
+        <td>outputDebugLog</td>
+        <td>Whether the component emits its debug log when written to.</td>
+        <td>true</td>
+        <td>false</td>
+        <td>Only available for components.</td>
+      </tr>
+      <tr>
+        <td>outputStateDiagramDefinition</td>
+        <td>Whether the component emits its state diagram definition string as states change.</td>
+        <td>true</td>
+        <td>false</td>
+        <td>Only available for components.</td>
+      </tr>
+      <tr>
+        <td>outputTransitionRejectionToConsole</td>
+        <td>Whether transition rejections are logged to the browser's console.</td>
+        <td>true</td>
+        <td>false</td>
+        <td>Only writable in dev mode.</td>
+      </tr>
+      <tr>
+        <td>recordFilteredUpdatesToDebugLog</td>
+        <td>Whether or not to write filtered updates to the debug log.</td>
+        <td>false</td>
+        <td>false</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>recordResetDataToDebugLog</td>
+        <td>Whether the state data the FSM returns to after a failed transition is included in the debug log.</td>
+        <td>true</td>
+        <td>false</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>resetDebugLogOnOverride</td>
+        <td>Whether to clear the debug log when the state is overridden.</td>
+        <td>true</td>
+        <td>false</td>
+        <td>Only writable in dev mode.</td>
+      </tr>
+      <tr>
+        <td>stateDiagramDirection</td>
+        <td>The direction the FSMs state diagram is drawn in.</td>
+        <td>"TB"</td>
+        <td>"TB"</td>
+        <td>"TB" = Top To Bottom <br/> "LR" = Left To Right</td>
+      </tr>
+      <tr>
+        <td>stringifyLogTransitionData</td>
+        <td>Whether to store state data in the debug log as an object or as a string.</td>
+        <td>false</td>
+        <td>true</td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Interacting with Stories Through Controls</h3>
+
+  <p><b>Storybook</b> provides a unique way to interface with a stories components via the use of controls.
+  Controls are UI elements that allow the user to dynamically change component variables without writing any code.</p>
+
+  <p><b>Storybook</b> will try to automatically identify applicable controls, but cannot determine their default values on its own.
+  Additionally, it may encounter difficulty recognizing variables with intricate data types. 
+  To address these issues and provide default values, the gaps can be filled by specifying an <code>args</code> object within the <code>Meta</code>. 
+  When defining an object variable as an <code>arg</code>, <b>Storybook</b> will only create controls for the keys that are provided default values. </p>
+  
+  <p>A useful control for debugging <b>FsmRxComponents</b> that <b>Storybook</b> fails to discover is the <code>fsmConfig</code> input which can be configured as follows:</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+  ...
+    args: {
+      fsmConfig: {
+          stateDiagramDirection: "TB",
+          debugLogBufferCount: 10,
+          outputDebugLog: true,
+          resetDebugLogOnOverride: true,
+          stringifyLogTransitionData: false,
+          outputStateDiagramDefinition: true,
+      }
+    }
+  }
+  ```
+  
+  <p>This produces the following control:</p> 
+
+  <figure>
+    <div>
+      <img src={fsmConfigControl} alt="Default controls" style={{ paddingBottom: '39px' }} />
+      <figcaption>The <b>Storybook</b> control for the<code>fsmConfig</code> Input in its default presentation.</figcaption>
+    </div>
+  </figure>
+
+  <h3>Improving <code>arg</code> Control Functionality with <code>DeepControls</code></h3>
+
+  <p>While the default <b>JSON</b> style control for object type variables offers all of the required functionality, its UI presentation can be unintuitive and error-prone when compared to single field controls.
+  These issues can be addressed using a plugin called <a href = "https://storybook.js.org/addons/storybook-addon-deep-controls" target="_blank"> deep-controls</a>.
+  This plugin allows for the targeting of individual object properties via their own dedicated control, maintaining the required functionality while significantly enhancing the UI.</p>
+
+  <p>Once installed via the command <code>npx storybook@latest add storybook-addon-deep-controls</code> the plugin is enabled using the <code>Meta.parameters</code> object.</p>
+
+   ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+  ...
+    parameters: {
+      ...
+      deepControls: { enabled: true },
+    }
+  }
+  ```
+
+  <h3>Configuring Controls Using <code>argTypes</code></h3>
+
+  <p>While <b>Storybook</b> does an admirable job of automatically configuring the required controls, these defaults can be overridden and customized using the <code>Meta.argTypes</code> property.
+  This allows for the definition of an individual controls data type, limiting the values it accepts which results in a more intuitive UI.
+  For instance, a control can be defined as a <code>select</code> type and provided a limited pool of <code>options</code> to select from.</p>
+
+  <p>More information on <code>argType</code> configuration can be found in the <a href = "https://storybook.js.org/docs/api/arg-types" target="_blank"><b>Storybook</b> documentation</a>.</p>
+  
+  <p>Depending on the linting rules of the project, it may be required to turn off certain rules when defining an <code>argTypes</code> object. 
+  <b>Typescript</b> can run into issues when addressing nested properties using dot-delimited string keys. 
+  These issues can be negated using <code>@ts-ignore</code> and, when using <b>eslint</b>, <code>eslint-disable-next-line @typescript-eslint/ban-ts-comment</code>.</p>
+  
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+  ...
+    parameters: {
+      ...
+      deepControls: { enabled: true },
+    },
+    argTypes: {
+      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      'fsmConfargTypesig.stateDiagramDirection': {
+          name: 'State Diagram Direction',
+          control: { type: 'select' },
+          options: ["LR", "TB"],
+      },
+      'fsmConfig.debugLogBufferCount': {
+          name: ' Debug Log Buffer Count',
+          control: { type: 'number' }
+      },
+      'fsmConfig.outputDebugLog': {
+          name: `Output Debug Log`,
+          control: { type: 'boolean' }
+      },
+      'fsmConfig.resetDebugLogOnOverride': {
+          name: `Reset Debug Log On Override`,
+          control: { type: 'boolean' }
+      },
+      'fsmConfig.stringifyLogTransitionData': {
+          name: `Stringify Log Transition Data`,
+          control: { type: 'boolean' }
+      },
+      'fsmConfig.outputStateDiagramDefinition': {
+          name: `Output State Diagram Definition`,
+          control: { type: 'boolean' }
+      },
+    }
+  }
+  ```
+  
+  <p>This produces the following set of controls:</p>
+
+  <figure>
+    <div>
+      <img src={fsmConfigDeepControls} alt="deep controls" style={{ paddingBottom: '57px' }} />
+      <figcaption>Using <code>deepControls</code> and <code>argTypes</code> to create user-friendly controls for interfacing with object properties individually.</figcaption>
+    </div>
+  </figure>
+
+    <h3>Hiding Unwanted Controls</h3>
+
+  <p>Occasionally <b>Storybook</b> will identify variables that you do not want to offer controls for. 
+  This could be because changing them may break functionality or have no discernable effect after initialisation.
+  For the <b>TrafficLightOverridableComponent</b> <b>Storybook</b> identifies the following unwanted controls:</p>
+
+  <figure>
+    <div>
+      <img src={unwantedControls} alt="Unwanted controls for the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
+      <figcaption>The unwanted controls <b>Storybook</b> generates for the <b>TrafficLightOverridableComponent</b>.</figcaption>
+    </div>
+  </figure>
+
+  <p>The controls can be omitted by defining a pipe-delimited string of the variables to exclude in the <code>Meta.parameters.controls.exclude</code> property:</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+  ...
+    parameters: {
+      ...
+      controls: {
+        exclude: '(stateMap|handleEnterState|ngAfterViewInit)'
+      }
+    }
+  }
+  ```
+
+  <h3>Overriding the State</h3>
+
+  <p>To greatly simplify testing and development, <b>FsmRx</b> includes a method of directly interfacing with states and their associated data via the <code>fsmCongig.stateOverride</code> property.
+  By default, this property is set to false, but it can be assigned a <code>StateOverride</code> object when an override is required. 
+  Overriding the state allows for the circumventing of <code>FsmRx</code> transition validation logic to jump to any desired state from any other in the FSM.</p>
+
+  <p><i>Note: The use of <code>stateOverride</code> in production is not supported, as it can cause unexpected behaviour, and is only intended for debugging purposes. 
+  Any attempt to set <code>stateOverride</code> in a production environment will be ignored.</i></p> 
+
+  <p>The <code>StateOverride</code> object includes two properties: <code>stateData</code>, which represents the data for the override state, and an optional <code>onOverride</code> callback function that is triggered after the override has been applied.</p> 
+
+  <p>An override state can be added to the <b>TrafficLightOverridableComponent</b> using the <code>Meta</code>.</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    args:{
+      ...
+      fsmConfig: {
+        ...
+        stateOverride: {
+          stateData: {
+            state: "prepareToStop",
+            stateTimeoutId: undefined,
+            trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 },
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  <p>This will add default controls that allow changing the state of the FSM to any other required state.
+  As with other controls, <code>deepControls</code> and the <code>argTypes</code> object can be used to customise as required:</p>
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    argTypes:{
+      ...
+      'fsmConfig.stateOverride.stateData.state': {
+        name: "Override State",
+        control: { type: 'select' },
+        options: ["go", "prepareToStop", "stop"],
+      },
+      'fsmConfig.stateOverride.stateData.trafficLightTimings.go': {
+        name: "Time in go state",
+        control: { type: 'number' },
+      },
+      'fsmConfig.stateOverride.stateData.trafficLightTimings.prepareToStop': {
+        name: "Time in prepare to stop state",
+        control: { type: 'number' },
+      },
+      'fsmConfig.stateOverride.stateData.trafficLightTimings.stop': {
+        name: "Time in stop state",
+        control: { type: 'number' },
+      }
+    }
+  }
+  ```
+  
+  <figure>
+    <div>
+      <img src={fsmConfigOverrideControls} alt="Override controls for the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
+      <figcaption>Custom controls that allows for overwriting of the <b>TrafficLightOverridableComponent</b> state data.</figcaption>
+    </div>
+  </figure>
+
+  <p><i>Note: <b>Storybook</b> controls set the values of their component properties at runtime. 
+  Because of this, they are not constrained by any of the <b>TypeScript</b> rules defined during development. 
+  In the above example, the controls for editing the interval between state changes accept any number value, not just the literals defined in the <b>TypeScript</b>.</i></p>
+
+  <h3>Simulating Lifecycle Hooks via the <code>onOverride</code> Function</h3>
+ 
+  <p>When transitioning to a state using a <code>stateOverride</code> neither the <code>onLeave</code> or <code>onEnter</code> lifecycle hooks are executed.
+  This presents a problem when testing components that use these hooks to setup and teardown state-specific functionality.</p>
+
+  <p>The <b>TrafficLightOverridableComponent</b> defines an <code>onEnter</code> function, shared between each of its states, called <code>handleEnterState</code>.
+  This function handles scheduling of the transitions to the next state via the creation of a <code>Timeout</code>, a reference to which is stored in the state data by immediately calling <code>onUpdate</code> after a successful <code>changeState</code> transition.</p>
+
+  ```ts
+  private handleEnterState(onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>): void {
+
+    const { enteringStateInfo } = onEnterStateChanges;
+    const { stateData } = enteringStateInfo;
+    const state = enteringStateInfo.state;
+
+    this.updateState({
+      ...stateData,
+      stateTimeoutId: window.setTimeout(() => {
+        this.changeState({
+          ...stateData,
+          state: enteringStateInfo.canLeaveTo[0],
+          stateTimeoutId: undefined
+        });
+      }, stateData.trafficLightTimings[state])
+    });
+  }
+  ```
+
+  <p>Applying an override to the <b>TrafficLightOverridableComponent</b> bypasses this function. 
+  While the template will update to show the new state, as none of the transition logic will execute, it will remain there indefinitely.
+  This may be desirable when working on errors with the visual presentation but otherwise can be remedied via the addition of an <code>onOverride</code> callback.</p>
+   
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    args:{
+      ...
+      fsmConfig: {
+        ...
+        stateOverride: {
+          ...
+          onOverride: function (this: TrafficLightOverridableComponent, onOverrideStateChanges: OnOverrideStateChanges<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) {
+            const { originalStateInfo, overridingStateInfo } = onOverrideStateChanges;
+            const { stateData, state } = overridingStateInfo;
+            if (originalStateInfo.state !== "FSMInit") {
+              window.clearTimeout(originalStateInfo.stateData.stateTimeoutId);
+            }
+            this.updateState({
+              ...stateData,
+              stateTimeoutId: window.setTimeout(() => {
+                window.clearTimeout(stateData.stateTimeoutId);
+                this.changeState({
+                  ...stateData,
+                  state: overridingStateInfo.canLeaveTo[0],
+                  stateTimeoutId: undefined
+                });
+              }, stateData.trafficLightTimings[state])
+            });
+          }
+        }
+      }
+    }
+  }
+  ```
+  <p>Similar to other lifecycle hook callbacks, this function receives an object that describes the transition. 
+  This <code>OnOverrideStateChanges</code> object contains data for both the original state and the overriding state which can be used to replicate any required <code>onLeave</code> or <code>onEnter</code> functionality.</p>
+
+  <p>In the preceding <code>onOverride</code> function for the <b>TrafficLightOverridableComponent</b> the <code>originalStateInfo</code> is used to retrieve the ID of the original states ongoing timeout for clearing, 
+  while the <code>overridingStateInfo</code> is used to schedule the transition to the next state.</p>
+
+  <p><i>Note: For an <code>onOverride</code> function defined in a stories <code>Meta</code> to have access to the <b>FsmRxComponents</b> methods and properties it must be provided a reference to its <code>This</code> object, which can be achieved using parameter annotation.</i></p>
+   
+  <h3>Cancelling RxJS Subscriptions when Overriding</h3>
+  
+  <p>In previous Traffic Light examples the RxJS <code>Timer</code> is used for scheduling transitions.
+  To aid with canceling <b>RxJS</b> subscriptions when overriding state, <b>FsmRx</b> contains a subject called <code>override$</code> which emits whenever an override occurs.
+  By using <code>takeUntil</code> alongside the <code>override$</code> subject the subscription can automatically be cancelled when overriding. 
+  This removes the need to manually cancel the timers in the <code>onOverride</code> function.</p>
+  
+  <p>The logic can be further simplified by moving the creation of these timers into their own function which can then be called from the <code>onOverride</code> function removing the need for duplication.</p>
+
+  <div class="breakout-box examples">
+    <p>The complete code for the following ["Traffic Light Overridable Alternate"](?path=/story/examples-7-traffic-light-overridable-alternate--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-overridable-alternate"</b>.</p>
+  </div>
+
+
+  ```ts
+  private handleEnterState(onEnterStateChanges: OnEnterStateChanges<TrafficLightStates, TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>): void {
+    const { enteringStateInfo } = onEnterStateChanges;
+    const { stateData, state, canLeaveTo } = enteringStateInfo;
+    const { trafficLightTimings } = stateData;
+    this.createTimer(trafficLightTimings[state], stateData, canLeaveTo[0]);
+  }
+
+  protected createTimer(interval: number, stateData: TrafficLightData, transitionTo: TrafficLightStates) {
+    timer(interval)
+      .pipe(takeUntil(this.override$))
+      .subscribe(() => {
+        this.changeState({
+          ...stateData,
+          state: transitionTo
+        });
+      });
+  }
+  ```
+
+  ```ts
+  const meta: Meta<TrafficLightOverridableComponent> = {
+    ...
+    args:{
+      ...
+      fsmConfig: {
+        ...
+        stateOverride: {
+          ...
+          onOverride: function (this: TrafficLightOverridableComponent, onOverrideStateChanges: OnOverrideStateChanges<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) {
+            const { overridingStateInfo } = onOverrideStateChanges;
+            const { stateData, state, canLeaveTo } = overridingStateInfo;
+            const { trafficLightTimings } = stateData;
+            this.createTimer(trafficLightTimings[state], stateData, canLeaveTo[0]);
+          }
+        }
+      }
+    }
+  }
+  ```
+ 
+  <p><i>Note: It is not recommended to use <code>stateData$</code> as a <code>takeUntil</code> notifier as it is a <code>behaviourSubjet</code> and will emit as soon as it is subscribed to. 
+  The <code>nextChangeStateTransition$</code> subject should be used instead.</i></p>
+
+  <h3>Conditional Story Controls</h3>
+
+  <p>States often have unique data requirements, leading to properties that are specific to certain states. 
+  In such instances, employing conditional controls allows for the display of only the controls relevant to a particular state in question.</p>
+
+  <p>The <b>UserLoginComponent</b> example login form contains an <code>errorMessage</code> property that is only defined in the state data if the user inputs an invalid username and password combination.</p>
+
+  <div class="breakout-box examples">
+    <p>The complete code for the following ["User Login"](?path=/story/examples-8-user-login--static) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/user-login"</b>.</p>
+  </div>
+
+  <figure>
+    <div>
+      <img src={userLoginError} alt="fsm-rx-debug-set wrapping the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
+      <figcaption>The error a user sees from entering an invalid username and password combination.</figcaption>
+    </div>
+  </figure>
+
+  <p>This <code>errorMessage</code> control can be conditionally displayed by supplying a query object to the <code>if</code> property of this controls definition. 
+  In the example below, the query assesses the <code>state</code> value of the override, only showing the <code>errorMessage</code> control when it is set to the <b>"error"</b> state.</p>
+  
+  ```Typescript
+  'fsmConfig.stateOverride.stateData.errorMessage': {
+    name: "Error Message",
+    if: { arg: 'fsmConfig.stateOverride.stateData.state', eq: 'error' },
+    control: { type: "text" },
+  },
+  ```
+  <p>There are four operators that can be applied to these queries:</p>
+
+  <ul>
+    <li><code>eq:any</code>: arg equals the value.</li>
+    <li><code>exists:boolean</code>: arg exists or not.</li>
+    <li><code>neq:any</code>: arg doesn't equal the value.</li>
+    <li><code>truthy:boolean</code>: arg is true or not.</li>
+  </ul>
+
+  <p>While Conditional Controls do provide some flexibility in deciding when to include certain controls, they are not without their limitations. 
+  Conditional Controls do not support compound conditionals, so there is no way to test multiple conditions simultaneously.</p>
+
+  <p>In the preceding example we looked at how to only show the <code>errorMessage</code> control when overriding to the <b>"error"</b> state. 
+  However, there is a second state that also defines <code>errorMessage</code> in its state data. 
+  When a user inputs an incorrect password too many times their account is locked for a predetermined period by entering a <b>"locked"</b> state. 
+  As this <b>"locked"</b> state will automatically return to the <b>"error"</b> state, it requires the <code>errorMessage</code> value to correctly populate the <b>"error"</b> state data.</p>
+
+  <p>Due to the limitations of <b>Storybook</b> Conditional Controls it is not possible for this control to only show in both the <b>"error"</b> and <b>"locked"</b> states. 
+  As the <code>errorMessage</code> is not displayed on-screen when in the <b>"locked"</b> state, this is not a significant issue in this instance, however if this limitation becomes an issue it may be better to define individual stories for each state.</p>
+  
+  <h3>Defining Multiple Stories</h3>
+
+  <p>Defining multiple stories is as easy as exporting multiple variable instances of the <code>Story</code> type from the <code>*.stories.ts</code> file, like so:</p>
+
+  ```ts
+  export const Static: Story = {}
+  export const Functional: Story = {}
+  ```
+  
+  <p>When applied to the <b>UserLoginComponent</b> story this creates two entries under <b>"User Login"</b> called <b>"Static"</b> and <b>"Functional"</b>.</p>
+
+  <figure>
+    <div>
+      <img src={exampleStoriesMenu} alt="fsm-rx-debug-set wrapping the TrafficLightOverridableComponent" style={{ paddingBottom: '57px' }} />
+      <figcaption>The <b>"Examples"</b> menu showing the <b>"Static"</b> and <b>"Functional"</b> stories.</figcaption>
+    </div>
+  </figure>
+
+  <p>These <code>Story</code> objects are used to override the properties set in a stories <code>Meta</code> definition.
+  When a property is defined in a <code>Story</code>, it entirely replaces the corresponding specification in the <code>Meta</code>.
+  Nevertheless, the spread operator can be employed to perform a shallow copy of the original properties. 
+  This way only values that require overriding need to be specified.</p>
+  
+  <p>While using <code>deepControls</code> it is not possible to override an <code>argTypes</code> control defined in the <code>Meta</code>. 
+  If a Story requires a unique configuration of a control, it should be removed from the <code>Meta</code> and defined in each of the <code>Story</code> objects as required.</p> 
+    
+  ```ts
+  export const Static: Story = {
+    argTypes: {
+      ...meta.argTypes,
+      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      'fsmConfig.stateOverride.stateData.username': {
+        name: "Override Username",
+        control: { type: "text" },
+        if: { arg: 'fsmConfig.stateOverride.stateData.state', eq: 'credentialsAccepted' },
+      },
+    }
+  };
+
+  export const Functional: Story = {
+    args: {
+      ...meta.args,
+      fsmConfig: {
+        ...meta.args?.fsmConfig,
+        stateOverride: {
+          stateData: {
+            state: "awaitingInput",
+            password: "12345",
+            username: "admin",
+          },
+          onOverride: function (this: UserLoginComponent, onOverrideStateChanges: OnOverrideStateChanges<UserLoginStates, UserLoginData, UserLoginCanLeaveToMap>) {
+            //Override function goes here          
+          }
+        },
+      },
+    },
+    parameters: {
+      ...meta.parameters,
+      controls: {
+        exclude: `${meta.parameters?.['controls'].exclude}|prefillPassword|prefillUsername`
+      }
+    },
+    argTypes: {
+      ...meta.argTypes,
+      //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      'fsmConfig.stateOverride.stateData.username': {
+        name: "Override Username",
+        control: { type: "text" },
+        if: { arg: 'fsmConfig.stateOverride.stateData.state', truthy: true },
+      },
+      'fsmConfig.stateOverride.stateData.password': {
+        name: "Override Password",
+        control: { type: "text" },
+        if: { arg: 'fsmConfig.stateOverride.stateData.state', truthy: true },
+      },
+    }
+  };
+  ```
+
+  <h3>Debugging Failed Transitions</h3>
+
+  <p><b>FsmRx</b> has been designed to be self-recoverable. If an error is detected or a transition cancelled, it will always reset to the last valid state.
+  In the event of a failed transition, developers can get details about the failure and perform additional side effects, such as bug reporting, via the automatically invoked <code>onTransitionRejected</code> function.</p>
+
+  <p><i>Note: This function is only intended for debugging purposes. 
+  Unexpected transition rejections should be fixed in the logic of the FSM rather than patched here.
+  The <code>onTransitionRejected</code> function is however an excellent place to submit a bug report containing the <code>debugLog</code>.</i></p>
+
+  <p>By default this function is empty but can be overridden as follows:</p>
+
+  ```ts
+  protected override onTransitionRejected(transitionRejection: TransitionRejection) {
+    console.log(this.debugLog);
+    console.log(transitionRejection);
+    alert("Transition Rejected \nHere you could submit a bug report if the rejection was unintended.");
+  }
+  ```
+
+  <p>The function receives a <code>TransitionRejection</code> object that specifies the error severity (<b>"warn"</b>, <b>"error"</b> or <b>"filtered-update"</b>), an error message and the reject reason. 
+  The possible reject reasons are as follows:</p>
+
+  <ul>
+    <li><code>after_fsm_destroy</code>: An attempt was made to transition after the FSM had been destroyed.</li>
+    <li><code>illegal_change_same_state</code>: An attempt was made to change the state to the current state.</li>
+    <li><code>illegal_update_FSMInit</code>: An attempt was made to update the <b>"FSMInit"</b> state. </li>
+    <li><code>internal_error:</code>: A data mismatch occurred, causing the transition to fail. Please submit a ticket if you encounter this error.</li>
+    <li><code>not_permitted_to_enter</code>: Attempted to change to a state you are not permitted to enter to from the current state.</li>
+    <li><code>not_permitted_to_leave</code>: Attempted to change to a state you are not permitted to leave to from the current state.</li>
+    <li><code>override_in_production</code>: An attempt was made to override a state while in production mode.</li>
+    <li><code>repeat_update_filtered</code>: A repeated update with the same data as the current state was filtered.</li>
+    <li><code>terminated_by_enter_callback</code>: The <code>onEnter</code> callback returned false, terminating the transition.</li>
+    <li><code>terminated_by_leave_callback</code>: The <code>onLeave</code> callback returned false, terminating the transition.</li>
+    <li><code>terminated_by_update_callback</code>: The <code>onUpdate</code> callback returned false, terminating the update. </li>
+    <li><code>unknown_error</code>: An unexpected error has occurred. Please submit a ticket if you see this error.</li>
+    <li><code>update_state_mismatch</code>: An attempt was made to update the state with data that doesn't match the current state.</li>
+  </ul>
+
+
+  <h3>Debugging Runtime Errors</h3>
+
+  <p>There is a similar function that executes when a runtime error is thrown, called <code>onUnknownError</code>.
+  These errors are usually caused due to issues in lifecycle hook callbacks.</p>
+
+  <p>The <code>onUnknownError</code> function receives the error that was thrown and the <code>StateTransition</code> data that caused the error to occur.</p>
+
+  <p><i>Note: As with the <code>onTransitionRejected</code> function, <code>onUnknownError</code> is only intended for debugging and logging purpose</i></p>  
+
+  ```ts
+  protected override onUnknownError(e: Error, rejectData: StateTransition<UserLoginStates, UserLoginData>) {
+    console.log(this.debugLog);
+    console.log(e, rejectData);
+    alert("Unknown Error thrown \nHere you could submit a bug report.");
+  }
+  ```
+
+  <div className="breakout-box">
+    <h3>Unit testing observables using the Rxjs TestScheduler</h3>
+    
+    <p>Unit testing is a vital part of modern software development, however testing asynchronous code can be challenging.
+    As <b>FsmRx</b> is built upon <b>RxJS</b> its <code>TestScheduler</code> utility can be used to write simple robust asynchronous unit tests.</p>
+          
+    <p>The <code>TestScheduler</code> enables assessment of the behaviour of the<code>observables</code> in the system over time by scheduling events in a simulated timeline, running this simulation, and then comparing the values emitted with those anticipated in a <code>Marble Diagram</code>.</p>
+
+    <p><i>The following example can be found at:<br/> <b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-simple/traffic-light-simple.spec.ts"</b> </i></p>
+
+    <p>Tests can be configured to use the <code>TestScheduler</code> by instantiating it in the <code>beforeEach</code> function of the System Under Test's (SUT) .spec.ts file.
+    The <code>TestScheduler</code> constructor accepts a comparison function which is used to compare the expected and actual values. 
+    This comparator is invoked each time the <code>expectObservable</code> function is called within a suite of tests.</p>
+    <p>During test authoring and debugging, it can be useful to output the <code>actual</code> and <code>expected</code> values as part of this comparator, as this can provide additional clarity on why tests fail.</p>
+
+    ```ts
+    describe('TrafficLightSimpleComponent', () => {
+
+      let component: TrafficLightSimpleComponent;
+      let fixture: ComponentFixture<TrafficLightSimpleComponent>;
+      let testScheduler: TestScheduler;
+
+      beforeEach(() => {
+
+        TestBed.configureTestingModule({
+          declarations: [TrafficLightSimpleComponent]
+        });
+
+        fixture = TestBed.createComponent(TrafficLightSimpleComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+
+        testScheduler = new TestScheduler((actual, expected) => {
+          console.log("actual", actual);
+          console.log("expected", expected);
+          expect(actual).toEqual(expected);
+        });
+      });
+      
+    });
+    ``` 
+    <p>Tests that utilise the <code>TestScheduler</code> can be thought of as having two phases, the <b>schedule</b> phase and the <b>run</b> phase.</p>
+
+    <p>In the <b>schedule</b> phase, the <code>TestScheduler.schedule</code> function is used to define any scheduled events that require testing.
+    The <code>TestScheduler.schedule</code> function accepts a callback used to execute the required event and a delay that specifies when in the simulated timeline the event should occur.</p>
+
+    ```ts
+    describe('TrafficLightSimpleComponent', () => {
+      ...
+      it('should do a test', () => {
+        testScheduler.schedule(() => { 
+          //Event trigger goes here
+        }, 1);
+        testScheduler.schedule(() => { 
+          //Event trigger goes here
+        }, 2);
+      });
+    })
+    ```
+    
+    <p>Testing with <code>FsmRx</code>, usually tests events that cause the <code>OnChange</code> or <code>OnUpdate</code> functions to be called. 
+    By default <code>OnChange</code> and <code>OnUpdate</code> are protected functions, so if you wish to test them directly you will need to extend your SUT and expose them.</p>
+    
+    <p>In the <b>Run</b> phase, the scheduled events are executed in a virtualised time environment using the <code>TestScheduler.run</code> function.
+    This <code>TestScheduler.run</code> function accepts a callback where test assertions are made. 
+    This callback is supplied an object called <code>RunHelpers</code>, which contains utility methods to assist with testing.
+    When testing <code>FsmRx</code> the <code>expectObservable</code> utility method is used to subscribe to the SUT's <code>stateData$</code> observable stream and assert against the values it emits using the returned <code>toBe</code> operator.
+    The <code>toBe</code> operator expects two parameters, a <code>Marble Diagram</code> representing when emissions happen and an object that describes what is emitted.</p>
+    
+    <p>A <code>Marble Diagram</code> is a string representation of a timeline of events describing an observable sequence over time.
+    Each character represents one unit of time called a frame, which during testing is equal to one millisecond.
+    Emitted data is represented by a single alphabetic character, while time progression can be described using either dashes "-" or millisecond values e.g. "10ms".
+    The end of the timeline is described using the pipe "|" character.</p>
+
+    <p>The following code asserts that the <code>stateData$</code> observable will emit the values 1,2 and 3 at intervals of one millisecond, before completing. 
+    More information on <code>Marble Diagram</code> can be found at <a href = "https://rxjs.dev/guide/testing/marble-testing" target="_blank">rxjs.dev/guide/testing/marble-testing</a>.</p>
+
+    ```ts
+    describe('TrafficLightSimpleComponent', () => {
+      ...
+      it('should cycle between the go, prepareToStop and stop states', () => {
+        ...
+        testScheduler.run((runHelpers: RunHelpers) => {
+          const { expectObservable } = runHelpers;
+          expectObservable(component.stateData$).toBe('abc|' { a: 1, b: 2, c: 3 }), 
+        });
+      });
+    })
+    ```
+
+    <p>The following example shows a test to assert that the <b>TrafficLightSimpleComponent</b> (demonstrated in ["Part 2: Creating a simple traffic light component with FsmRx"](?path=/docs/2-creating-a-simple-traffic-light-component-with-fsmrx--docs))
+    correctly cycles between its <b>"go"</b>,<b>"prepareToStop"</b> and <b>"stop"</b> states. 
+    The inner workings of this component are relatively straightforward. Upon each <code>changeState</code> transition, the duration required to remain in the state is used to create an <b>RxJS</b> <code>timer</code>.
+    At the completion of this timer, the FSM initiates a transition to the next state and the cycle repeats indefinitely. This cycle is initiated in the <code>ngAfterViewInit</code> function via the first <code>changeState</code> request.</p>
+
+    <p>Despite this component's relative simplicity, testing self-initiating FSMs can be challenging.
+    During the <b>Run</b> phase the <code>TestScheduler</code> will subscribe to the SUT observable and monitor its outputs using the <code>expectObservable</code> function.
+    If the SUT is already emitting values when the <code>expectObservable</code> function is called the <code>TestScheduler</code> will not correctly identify the <code>timer</code> intervals and will immediately finish.</p>
+    
+    <p>To solve this, the execution of <code>ngAfterViewInit</code> is delayed until after subscription to the SUT observable, by moving <code>fixture.detectChanges();</code> out of the <code>beforeEach</code> function and into a <code>testScheduler</code> scheduled event.
+    This event can be scheduled at any desired time, however, to capture the initial <b>"FSMInit"</b> state it should not scheduled at 0.</p>
+    
+    <p>When testing <b>FsmRx</b> services you may need to come up with additional strategies to solve these race conditions.
+    As such it may be useful to extend the SUT to expose it's initialization functions for use in <code>testScheduler.schedule</code> events.</p>
+    
+    <p>As the FSM will cycle indefinitely it is necessary to specify an end point for this test. 
+    This can be achieved either by using <code>testScheduler.maxFrames</code> or by scheduling a <code>fixture.destroy()</code> event.</p>
+
+    ```ts
+    describe('TrafficLightSimpleComponent', () => {
+      ...
+      it('should cycle between the go, prepareToStop and stop states', () => {
+        testScheduler.schedule(() => { fixture.detectChanges(); }, 1);
+        testScheduler.schedule(() => { fixture.destroy(); }, 20002);
+      });
+    })
+    ```
+
+  
+    <p>The defined events are executed using the <code>testScheduler.run</code> function which is also used to assert that the SUT's <code>stateData$</code> observable stream emits the correct expected values.
+    Given the events scheduled, it is expected that the SUT observable will transition from <b>"FSMInit"</b> -> <b>"Go"</b> -> <b>"prepareToStop"</b> -> <b>"stop"</b> -> <b>"Go"</b> before completing,
+    waiting at each state for 1ms, 7seconds, 3seconds, 10seconds and 1ms respectively. 
+    This timeline can be represented in the marble diagram <code>'a b 6999ms c 2999ms d 9999ms e |'</code>.
+    As the intervals between emissions are quite long they are defined using ms values, as representing each frame with dashes would require thousands of characters.</p>
+
+    <p>Finally to execute this test assertion, this marble diagram is passed into the <code>toBe</code> operator returned by the <code>expectObservable</code> function, along with an object that describes the data expected to be emitted.</p> 
+  
+    ```ts
+    describe('TrafficLightSimpleComponent', () => {
+      ...
+      it('should cycle between the go, prepareToStop and stop states', () => {
+        ...
+        testScheduler.run((runHelpers: RunHelpers) => {
+          const { expectObservable } = runHelpers;
+          expectObservable(component.stateData$).toBe('a b 6999ms c 2999ms d 9999ms e |', {
+            a: { state: "FSMInit" },
+            b: { state: 'go', trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } },
+            c: { state: 'prepareToStop', trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } },
+            d: { state: 'stop', trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } },
+            e: { state: 'go', trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 10000 } },
+          });
+        });
+      });
+    })
+    ```
+  </div>
+  <hr/>
+  <p>This concludes the series on creating finite state machines with <b>FsmRx</b>. You should now have all the knowledge necessary to build your own FSMs.
+  I hope you enjoyed this deep-dive into <b>FsmRx</b> and look forward to seeing what you create in the future.</p>
+
+</article>
+
+<style>
+  {`
+    h2{
+      border-bottom:none !important;
+    }
+
+    h3, h4{
+      text-align: center;
+      text-decoration:underline;
+    }
+
+    h4{
+      font-size: 20px !important;
+      margin: 16px 0 !important;
+    }
+
+
+    article p{
+      margin:10px;
+      font-size:16px!important;
+    }
+
+
+    sub{
+      line-height:0px;
+    }
+
+    img{
+      background-color:#fff;
+    }
+
+    ol, ul{
+      margin:0px 40px!important;
+    }
+
+    ol li,
+    ul li{
+      font-size:16px !important;
+    }
+
+    figure{
+        display:flex;
+        justify-content: center;
+        position:relative;
+        text-align: center; 
+        margin: 30px auto; 
+    }
+    
+    figure div{
+      display:flex;
+      position:relative;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    figure figcaption {
+        position:absolute;
+        bottom:0px;
+        left: 0px;
+        right: 0px;
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.65);
+        color:white;
+        font-size:14px;
+    }
+
+   
+    .breakout-box{
+      border: 2px solid #000; 
+      background-color: #dbe5f0;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      margin: 30px 100px;
+      overflow:hidden;
+    }
+
+    .breakout-box > * {
+      padding:0px 20px;
+    }
+
+    .breakout-box h3{
+      position:relative;
+      color:white;
+      padding: 10px 20px!important;
+      border-bottom: 1px solid #000;
+      margin:0px;
+      text-align: left;
+      background-color: #4f81bd;
+    }
+
+    .columns{
+      display:flex;
+      gap: 20px;
+    }
+
+    .breakout-box .columns{
+      align-items: center;
+    }
+
+    .columns figure{
+      flex: 0 0 auto;
+      margin: 0px;
+    }
+
+    .breakout-box ol,
+    .breakout-box ul{
+      margin: 16px 40px 22px!important;
+    }
+
+    .breakout-box .docblock-source{
+      margin:25px 20px 40px;
+    }
+
+    .breakout-box.examples{
+      margin:30px auto;
+      width: fit-content;
+    }
+
+    .breakout-box.examples p{
+      display: inline-block;
+      text-align: center;
+    }
+
+  `}
+</style>

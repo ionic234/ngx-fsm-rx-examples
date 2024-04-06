@@ -1,27 +1,45 @@
 # NgxFsmRxExamples
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.12.
+## About 
 
-## Development server
+Deep dive articles and Angular examples of [NgxFsmRx](https://github.com/ionic234/ngx-fsm-rx), an Angular wrapper around [FsmRx](https://github.com/ionic234/fsm-rx), a Finite State Machine built upon RxJS and Typescript.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Related projects
 
-## Code scaffolding
+* [FsmRx](https://github.com/ionic234/fsm-rx): Core FsmRx package
+* [NgxFsmRx](https://github.com/ionic234/ngx-fsm-rx): An Angular Wrapper for FsmRx
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Further Documentation 
 
-## Build
+For full documentation see:
+* [FsmRx Public API Compodoc Documentation](https://ionic234.github.io/fsm-rx/) 
+* [NgxFsmRx Public API Compodoc Documentation](https://ionic234.github.io/ngx-fsm-rx/) 
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## View Online
 
-## Running unit tests
+The examples and articles contained in this project can be viewed online [here](https://ionic234.github.io/ngx-fsm-rx-examples).
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Installation 
 
-## Running end-to-end tests
+To run the project first clone the repository.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```
+git clone git@github.com:ionic234/ngx-fsm-rx-examples.git
+```
 
-## Further help
+In the cloned folder install the npm packages and run the storybook playground 
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+npm i
+npm run storybook
+```
+
+## Get in contact
+
+### Submit a bug report
+
+Please visit [github/issues](https://github.com/ionic234/ngx-fsm-rx-examples/issues) to submit a bug report or feature request. 
+
+### Community  
+
+For the latest news and community discussions please visit the [github/discussions](https://github.com/ionic234/fsm-rx/discussions) in the core [FsmRx](https://github.com/ionic234/fsm-rx) package. This is done to not split the community. 

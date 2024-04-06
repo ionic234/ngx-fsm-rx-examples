@@ -1,0 +1,294 @@
+
+import { Meta } from "@storybook/blocks";
+import trafficLightRightTurnStateDiagram from "./assets/part3/traffic-light-right-turn-state-diagram.svg";
+import trafficLightRightTurnStopWithRightTurnState from "./assets/part3/traffic-light-right-turn-stopWithRightTurn-state.png";
+
+<Meta title="3. Modifying an Existing FSM" /> 
+
+<article>
+  <h1>Creating Finite State Machines with FsmRx</h1>
+  <hr />
+  <h2>Part 3: Modifying an Existing FSM</h2>
+
+  <p>We've all been there, after days of hard work we finally have the requested functionality finished and working to specifications when the stakeholder turns around and says "Can we just add this one little feature?".
+  Through gritted teeth we answer "Of course", knowing full well this "little" feature will mean countless hours of rewriting and retesting. 
+  However the dreaded spectre of "feature creep" becomes a lot less daunting when using FSMs.</p>
+
+  <p>FSMs compartmentalised structure of module-like states with strictly defined transitions, make adding, removing and reordering functionality simple. 
+  This example imagines a scenario where, at the last minute, a right turn is added to the requirements of the Simple Traffic Light Component. 
+  Management would like this to be a right green arrow that is on for the last 3 seconds of the <b>"stop"</b> state and for all of the <b>"go"</b> state. </p> 
+
+  <div class="breakout-box examples">
+    <p>The complete code for the following ["Traffic Light Right Turn"](?path=/story/examples-2-traffic-light-right-turn--default) <br/> example story can be found in the folder <br/><b>"/projects/ngx-fsm-rx-examples/src/stories/traffic-light-right-turn"</b>.</p>
+  </div>
+
+  <h3>Adding a New State</h3>
+
+  <p>By analysing the requirements, the following three changes can be identified:</p>
+  
+  <ol>
+    <li>Create a new state where both the stop and the right turn signals are active at the same time, lasting for three seconds, called <b>"stopWithRightTurn"</b>.</li>
+    <li>Reduce the duration of the stop state by three seconds to account for the time spent in the new <b>"stopWithRightTurn"</b> state.</li>
+    <li>Update the <b>HTML</b> template to contain this new signal light element and update the <code>ngClass</code> conditions to ensure the correct lights are active during each state.</li> 
+  </ol>
+
+  <p>To set up the new state it must first be added to the the Traffic Lights state string union:</p> 
+  
+  ```typescript
+  type TrafficLightStates = "go" | "prepareToStop" | "stop" | "stopWithRightTurn";
+  ```
+  
+  <p>Next the <b>"stopWithRightTurn"</b> is added to the <code>TrafficLightCanLeaveToMap</code> with the <b>"stop"</b> state updated to transition to the new <b>"stopWithRightTurn"</b> state, which in turn is set to transition to the <b>"go"</b> state.</p>
+ 
+  ```ts
+  type TrafficLightCanLeaveToMap = {
+    FSMInit: "go",
+    go: "prepareToStop",
+    prepareToStop: "stop",
+    stop: "stopWithRightTurn";
+    stopWithRightTurn: "go",
+  };
+  ```
+
+  <p>These changes also need to be reflected in the <code>stateMap</code> property like so:</p>
+
+  ```ts
+  protected override stateMap: StateMap<
+    TrafficLightStates,
+    TrafficLightData,
+    TrafficLightCanLeaveToMap
+  > = {
+      go: {
+        canEnterFromStates: { FSMInit: true, stopWithRightTurn: true },
+        canLeaveToStates: { prepareToStop: true },
+        onEnter: this.handleEnterState
+
+      },
+      prepareToStop: {
+        canEnterFromStates: { go: true },
+        canLeaveToStates: { stop: true },
+        onEnter: this.handleEnterState
+      },
+      stop: {
+        canEnterFromStates: { prepareToStop: true },
+        canLeaveToStates: { stopWithRightTurn: true },
+        onEnter: this.handleEnterState
+      },
+      stopWithRightTurn: {
+        canEnterFromStates: { stop: true },
+        canLeaveToStates: { go: true },
+        onEnter: this.handleEnterState
+      },
+    };
+  ```  
+
+  <p>These changes result in the following updated State Diagram:</p>
+
+  <figure>
+    <div>
+      <img src={trafficLightRightTurnStateDiagram} alt="Updated Traffic Light State Diagram" style={{ padding: '10px 20px 52px 10px', width: '196px' }} />
+      <figcaption>The updated State Diagram.</figcaption>
+    </div>
+  </figure>
+
+
+  <p>As evident in the previous example the use of defined transitions makes altering program flow much easier. No longer is it necessary to hunt through the code to make these changes. 
+  What's more, if the <code>changeState</code> and <code>updateState</code> function calls are typed to the expected current state, changes to the <code>CanLeaveToMap</code> that invalidate these calls will be highlighted in the <b>IDE</b>, making even complex code simple to maintain.</p>
+
+  <h3>Updating the Data</h3>
+
+  <p><b>FsmRx</b> also makes updating data easy.
+  For this Simple Traffic Light component all that is required to update the data to support the new <b>"stopWithRightTurn"</b> state is to add it to the <code>TrafficLightTimings</code> object,
+  tweak the values to the required durations and update these values in the initial changeState function call in the <code>ngAfterViewInit</code> function.</p>
+
+  ```ts
+  type TrafficLightTimings = {
+    go: 7000,
+    prepareToStop: 3000,
+    stop: 7000;
+    stopWithRightTurn: 3000,
+  };
+  ...
+  public override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+    this.currentState$.subscribe((currentStateInfo: CurrentStateInfo<TrafficLightStates, TrafficLightData, TrafficLightCanLeaveToMap>) => {
+      const { state } = currentStateInfo;
+      if (state === "FSMInit") {
+        this.changeState<FSMInit>({ state: "go", trafficLightTimings: { go: 7000, prepareToStop: 3000, stop: 7000, stopWithRightTurn: 3000 } });
+      }
+    });
+  }
+  ```
+  
+  <h3>Updating the Template</h3>
+
+  <p>The first step in adding the right turn arrow to the template is to create a <b>HTML</b> element to hold the right turn arrow. 
+  As this element needs to sit at the bottom right of the existing traffic light <b>absolute positioning</b> is used to place it where it is needed.</p>
+  
+  <p>In the updated specs the red and right-turn lights need to be active for multiple states. 
+  In the case of the red light, it is needed for both the <b>"stop"</b> and <b>"stopWithRightTurn"</b> states, while the new right-turn light is required to be on during both the <b>"stopWithRightTurn"</b> and <b>"go"</b> states.
+  In <b>Angular</b> the <code>ngClass</code> directive supports compound conditionals, allowing the <code>||</code>(or) operator to be used to add the required clauses to the relevant expressions.</p>
+  
+  ```typescript
+  <div class="traffic-light-housing"
+    *ngIf="stateData$ | async as stateData">
+    <ul>
+        <li>
+            <span class="red"
+                [ngClass]="{'on':stateData.state === 'stop'  || stateData.state === 'stopWithRightTurn'}"></span>
+        </li>
+        <li>
+            <span class="amber"
+                [ngClass]="{'on':stateData.state === 'prepareToStop'}"></span>
+        </li>
+        <li>
+            <span class="green"
+                [ngClass]="{'on': (stateData.state === 'go')  }"></span>
+        </li>
+    </ul>
+    <div class="right-turn">
+        <span class="green"
+            [ngClass]="{'on':stateData.state === 'stopWithRightTurn' || stateData.state === 'go'}"></span>
+    </div>
+</div>
+```
+
+<p>With these updates completed, the traffic light has been successfully updated to contain a right turn light which looks like this:</p>
+
+<figure>
+  <div>
+    <img src={trafficLightRightTurnStopWithRightTurnState} alt="Traffic Light With Right Turn in stopWithRightTurn State" style={{ paddingBottom: '40px' }} />
+    <figcaption>The updated traffic light in its <b>"stopWithRightTurn"</b> state.</figcaption>
+  </div>
+</figure>
+
+
+<hr/>
+<p>So far we have created and updated FSMs that work as closed systems. However, real world applications don't exist in a vacuum. 
+In ["Part 4: Reacting to user input"](?path=/docs/4-reacting-to-user-input--docs) we will explore how <b>FsmRx</b> handles user interactions by adding a pedestrian crossing button to the traffic light component.</p>
+</article>
+
+<style>
+  {`
+    h2{
+      border-bottom:none !important;
+    }
+
+    h3, h4{
+      text-align: center;
+      text-decoration:underline;
+    }
+
+    h4{
+      font-size: 20px !important;
+      margin: 16px 0 !important;
+    }
+
+
+    article p{
+      margin:10px;
+      font-size:16px!important;
+    }
+
+
+    sub{
+      line-height:0px;
+    }
+
+    img{
+      background-color:#fff;
+    }
+
+    ol, ul{
+      margin:0px 40px!important;
+    }
+
+    ol li,
+    ul li{
+      font-size:16px !important;
+    }
+
+    figure{
+        display:flex;
+        justify-content: center;
+        position:relative;
+        text-align: center; 
+        margin: 30px auto; 
+    }
+    
+    figure div{
+      display:flex;
+      position:relative;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    figure figcaption {
+        position:absolute;
+        bottom:0px;
+        left: 0px;
+        right: 0px;
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.65);
+        color:white;
+        font-size:14px;
+    }
+
+   
+    .breakout-box{
+      border: 2px solid #000; 
+      background-color: #dbe5f0;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      margin: 30px 100px;
+      overflow:hidden;
+    }
+
+    .breakout-box > * {
+      padding:0px 20px;
+    }
+
+    .breakout-box h3{
+      position:relative;
+      color:white;
+      padding: 10px 20px!important;
+      border-bottom: 1px solid #000;
+      margin:0px;
+      text-align: left;
+      background-color: #4f81bd;
+    }
+
+    .columns{
+      display:flex;
+      gap: 20px;
+    }
+
+    .breakout-box .columns{
+      align-items: center;
+    }
+
+    .columns figure{
+      flex: 0 0 auto;
+      margin: 0px;
+    }
+
+    .breakout-box ol,
+    .breakout-box ul{
+      margin: 16px 40px 22px!important;
+    }
+
+    .breakout-box .docblock-source{
+      margin:25px 20px 40px;
+    }
+
+    .breakout-box.examples{
+      margin:30px auto;
+      width: fit-content;
+    }
+
+    .breakout-box.examples p{
+      display: inline-block;
+      text-align: center;
+    }
+
+  `}
+</style>

@@ -3,5 +3,58 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "ngx-fsm-rx-examples": {
+      "projectType": "library",
+      "root": "projects/ngx-fsm-rx-examples",
+      "sourceRoot": "projects/ngx-fsm-rx-examples/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/ngx-fsm-rx-examples/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngx-fsm-rx-examples/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/ngx-fsm-rx-examples/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/ngx-fsm-rx-examples/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        },
+        "storybook": {
+          "builder": "@storybook/angular:start-storybook",
+          "options": {
+            "configDir": "projects/ngx-fsm-rx-examples/.storybook",
+            "browserTarget": "ngx-fsm-rx-examples:build",
+            "compodoc": false,
+            "port": 6006,
+            "enableProdMode": false
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular:build-storybook",
+          "options": {
+            "configDir": "projects/ngx-fsm-rx-examples/.storybook",
+            "browserTarget": "ngx-fsm-rx-examples:build",
+            "compodoc": false,
+            "outputDir": "storybook-static",
+            "enableProdMode": false
+          }
+        }
+      }
+    }
   }
 }
