@@ -1,12 +1,15 @@
 {
   "name": "ngx-fsm-rx-examples",
-  "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "storybook": "ng run ngx-fsm-rx-examples:storybook",
+    "build-storybook": "ng run ngx-fsm-rx-examples:build-storybook",
+    "clean:node-modules": "if exist node_modules rd /s /q node_modules",
+    "reinstall": "npm run clean:node-modules && npm i"
   },
   "private": true,
   "dependencies": {
@@ -18,13 +21,25 @@
     "@angular/platform-browser": "^16.2.0",
     "@angular/platform-browser-dynamic": "^16.2.0",
     "@angular/router": "^16.2.0",
+    "deep-equal": "^2.2.3",
+    "fsm-rx": "^1.0.0",
+    "ngx-fsm-rx": "^1.0.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.12",
     "@angular/cli": "^16.2.12",
     "@angular/compiler-cli": "^16.2.0",
+    "@storybook/addon-essentials": "^7.6.17",
+    "@storybook/addon-interactions": "^7.6.17",
+    "@storybook/addon-links": "^7.6.17",
+    "@storybook/angular": "^7.6.17",
+    "@storybook/blocks": "^7.6.17",
+    "@storybook/test": "^7.6.17",
+    "@types/d3": "^7.4.3",
+    "@types/dompurify": "^3.0.5",
     "@types/jasmine": "~4.3.0",
     "jasmine-core": "~4.6.0",
     "karma": "~6.4.0",
@@ -32,6 +47,14 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "mermaid": "^10.4.0",
+    "ng-packagr": "^16.2.0",
+    "prompts": "^2.4.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.6.17",
+    "storybook-addon-deep-controls": "^0.6.1",
+    "string-replace-loader": "^3.1.0",
     "typescript": "~5.1.3"
   }
 }

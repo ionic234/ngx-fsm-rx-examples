@@ -1,0 +1,307 @@
+
+import { Meta } from "@storybook/blocks";
+import statesOfWater from "./assets/part1/states-of-water.png";
+import formStatesExpected from './assets/part1/form-states-expected.png';
+import formStatesActual from "./assets/part1/form-states-actual.png";
+import trafficLightStateDiagram from "./assets/part1/traffic-light-state-diagram.svg";
+
+import { TableOfContents } from '@storybook/addon-docs/blocks';
+
+<Meta title="1. Introduction to Finite State Machines and FsmRx" /> 
+
+<article>
+  <h1>Creating Finite State Machines with FsmRx</h1>
+  <hr />
+  <h2>Part 1: An Introduction to Finite State Machines and FsmRx</h2> 
+  
+  <p>In the fast-paced world of modern software development, complexity continues to rise while deadlines only shrink.
+  As developers strive to meet these challenges head-on, the need for robust tools that streamline production while offering a higher level of code structure, clarity and self-documentation has become paramount to success.
+  In this article, we will explore the power of Finite State Machines (FSMs) and introduce <b>FsmRx</b>, a library that helps you reduce complexity, meet tight deadlines, and maintain focus on your project's core functionality.</p>
+  
+  <h3>What is State?</h3>
+  
+  <p>In layman's terms a state is a defined action or condition that something can be in. For example, a light switch can either be in an <b>"on"</b> or <b>"off"</b> state. </p>
+  
+  <div className="breakout-box">
+    <h3>The Three States of Water example</h3>
+    <div class="columns">
+      <figure>
+        <div>
+          <img src={statesOfWater} alt="Three States of Water" style={{ paddingBottom: '40px', width: '330px' }} />
+          <figcaption> The Three States of Water Infographic. <br/> Web Reference: https://earthhow.com/states-of-water/</figcaption>
+        </div>
+      </figure>
+      <div>
+        <p>In this well known example H<sub>2</sub>O can exist in three distinct states: <b>"solid"</b>(ice), <b>"liquid"</b>(water) and <b>"gas"</b>(steam). It is also possible to transition between these states by applying or removing heat/pressure.</p>
+        <p>FSMs function similarly by defining a limited set of states a system can be in and the rules that govern transitions between these states. Transitions usually occur due to user input or as a result of processing/fetching of data.</p>
+        <p>This example demonstrates the core principles of FSMs in an easy-to-digest way that should be familiar to most people. This familiarity creates shared understanding/language between developers, designers and stakeholders allowing for greater cross-discipline collaboration.</p>
+      </div>
+    </div>
+  </div>
+  
+  <p>All applications, services and components have an internal state that determines what they are doing and the actions available to a user at any given point. However, not all applications will formally identify these states in their codebase.
+  For these applications, their state is derived by the combined toggling of boolean flags and the setting and unsetting of nullable properties.</p> 
+  <p>Imagine a form with the following properties:</p>
+  
+  ```typescript
+  public isError:boolean = false; // Controls the visibility of error styling. 
+  public isSubmitButtonDisabled: boolean = false; // Controls if the user can submit the form data via a UI button element. 
+  ```
+  
+  <p>These properties imply the existence of two informal states, an <b>"awaitingInput"</b> state and an <b>"error"</b> state. When both properties are false it is implied that the application is in an <b>"awaitingInput"</b> state and when both are true it is in an <b>"error"</b> state.
+  It is also possible to transition back and forth between these two states by setting these properties to their corresponding values.</p>
+  
+  <figure>
+    <div>
+      <img src={formStatesExpected} alt="Diagram of expected implied states" style={{ paddingBottom: '45px' }} />
+      <figcaption>A diagram showing the expected implied states and transitions of the form example.</figcaption>
+    </div>
+  </figure>
+
+  <p>While this structure works fine for simple applications, it does have a few drawbacks which impact maintainability, scalability and predictability.
+  Developing in this manner creates high levels of mental load for developers, who are required to keep track of the complex interplay between many different properties and variables. 
+  This increases complexity, development time and stress.</p>
+  
+  <p>These issues are compounded when it is time for maintenance, as developers may have forgotten how the code works or could be updating code they did not author.
+  With informal states, no concrete information is provided about what the code is doing and it is left up to the maintainer to figure out its purpose and make the appropriate changes, hopefully without breaking anything.
+  This increases the time it takes to update while placing an additional burden on the QA teams. Descriptive naming and code comments can mitigate some of these issues, but they may not always be as helpful as intended or kept up to date.</p>
+  
+  <p>Another serious issue with relying on informal states is the introduction of hidden, unknown and unintended states. In the form example diagram, there are third and fourth unknown states that represent possible bugs in the application.
+  These states occur when the variables are not in sync with each other and can happen if a developer sets one variable while forgetting the other. If <code>isError</code> was set to false while <code>submitButtonDisabled</code> was left as true, the user would not see any error stylings but be unable to submit their data.
+  Conversely, if <code>isError</code> was true while <code>submitButtonDisabled</code> was false, the user could submit their data despite the form showing errors.</p> 
+  
+  <figure>
+    <div>
+      <img src={formStatesActual} alt="Diagram of expected implied states" style={{ paddingBottom: '45px' }} />
+      <figcaption>A diagram showing the actual implied states and transitions of the form example.</figcaption>
+    </div>
+  </figure>
+
+  <p>As can be seen in the diagram, the discovery of these two hidden states greatly increases the complexity of this simple form example. Rather than two easily understood states connected by two possible transitions, the complexity has ballooned to four states with twelve possible transitions.
+  The hidden nature of this complexity makes it difficult to manage and can lead to buggy unpredictable code and missed deadlines.</p>
+ 
+  <p>This example also highlights an issue with the unrestricted number of state transitions that arise from informal states. As there are no explicit rules to define how the application transitions between states, every state can effectively transition to every other state at any given time.
+  This means that as new informal states are added the number of possible transition states grows exponentially. This makes code very hard to interpret and update, as the possible combinations of properties can quickly grow to be unmanageable.
+  Code with lots of informal states and many hidden transitions between them is usually referred to as spaghetti code.</p>   
+  
+  <h3>How can Finite State Machines help?</h3>
+  
+  <p>An FSM formally defines all of the possible states it can be in, the rules that govern state transitions and the data each state has access to.
+  State changes are explicitly triggered by calling a transition function with the appropriate valid data. 
+  These transition requests are checked to ensure that the destination state exists and whether or not the transition is allowed. 
+  This makes it impossible to be in an unknown bug state and ensures the application progresses correctly along a well-defined path. 
+  These formal definitions make code much easier to write, maintain and test.</p>
+
+  <p>There are typically two types of FSM known as Circular and Terminating.
+  In a Circular FSM there is no end state and the system can loop around its defined states indefinitely. 
+  Conversely, in a Terminating FSM the system has a desired end state.
+  Once this end state is reached the FSM cannot traverse to any other state and is said to have terminated.</p>
+  
+  <div className="breakout-box">
+    <h3>Traffic Light FSM example</h3>
+    <div class="columns">
+      <div>
+        <p>A familiar real-world example of an FSM is a traffic light. A standard traffic light has three lights, a green light, an orange light and a red light. These lights control the flow of traffic by signalling to drivers when it is safe to proceed.</p>
+        <p>When represented in an FSM, traffic lights (in Australia) have three states. A <b>"go"</b> state (green), a <b>"prepareToStop"</b> state (orange) and a <b>"stop"</b> state (red).
+        The traffic light can't be in two states at once and the sequence of state transitions is well-defined and predictable: <b>"go"</b> will always transition to <b>"prepareToStop"</b>, <b>"prepareToStop"</b> will always transition to <b>"stop"</b> and <b>"stop"</b> will always return to <b>"go"</b>.</p>
+        <p>The formal structure of FSMs ensures these rules are always followed as the consequences of transitioning to the wrong state at the wrong time could be catastrophic.</p>
+      </div>
+      <figure>
+        <div>
+          <img src={trafficLightStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 20px 80px 10px', width: '230px' }} />
+          <figcaption>A state diagram showing the states and transitions of a standard traffic light.</figcaption>
+        </div>
+      </figure>
+    </div>
+  </div>
+
+  <p>The main benefits of FSMs are:</p>
+  <ol> 
+    <li><b>Modularity</b>: By compartmentalising functionality and data into self-contained states, FSMs promote the principle of Separation of Concerns. This reduces complexity, enhancing the system's comprehensibility and maintainability.</li>
+    <li><b>Flexibility</b>: FSMs allow for the modification, addition, and restructuring of states and their transitions without impacting the entire state machine system, offering flexibility in design and prototyping. </li>
+    <li><b>Simplicity and clarity</b>: FSMs provide a clear and straightforward representation of states, state data and their transitions, aiding in understanding the system's behaviour.</li>
+    <li><b>Testablility</b>: States and transitions can be easily isolated and tested independently, ensuring reliability and easier debugging. With the use of FSMs a state becomes a deliverable allowing testing to begin before the whole system is complete providing early access to feedback.</li>
+    <li><b>Self-documenation and visualisation</b>: FSMs are self-documenting and easy to visualise through the use of state diagrams. These diagrams provide a visual depiction of the system's states and transitions, enhancing communication and understanding between developers and stakeholders.</li>
+  </ol>
+
+  <p>While FSMs are a powerful tool, they are not a panacea for every coding issue. FSMs are best suited for systems with well-defined procedures of limited scope.
+  This makes them an excellent choice for front-end UI systems where UX journeys are typically well mapped out with limited variations. Services that follow a linear and predictable set of branching tasks can also benefit from the clarity FSMs provide.
+  They are not so suitable for complex systems with large numbers of states and transitions, nor repetitive data processing tasks with no state transitions. 
+  Stateless APIs that handle multiple requests from clients at the same time are also poor candidates for FSMs.</p>
+
+  <div className="breakout-box">
+    <h3>When to separate functionality into states?</h3>
+    <p>While there are no hard and fast rules for how functionality should be separated into unique states, there are a few easily identifiable scenarios that can help guide you when defining the states for your FSMs.</p> 
+    <ul>
+      <li>Designers will often present developers with multiple variations of a design highlighting important UI and style variants. These design variations are excellent candidates for their own states.</li>
+      <li>When the application changes tasks it typically indicates the need for a new state. For example, awaiting user input and submitting that input to the server are two easily identifiable distinct states.</li>
+      <li>A new state is often required when the actions a user can or is expected to perform change. In the traffic light example, user behaviour changes depending on which light is on or off. 
+      This suggests that each light should be its own state.</li>
+    </ul>
+  </div>
+
+  <h3>Introducing FsmRx</h3>
+  <p><b>FsmRx</b> is a family of libraries built upon <b>RxJS</b>, that is designed to simplify the implementation of Finite State Machines in front-end projects. Its intuitive API facilitates the straightforward definition and administration of numerous states, their associated data, and the transitions connecting them.
+  Developed in <b>TypeScript</b>, it boasts an extensive type system, leveraging the latest language features. 
+  This system enhances code hinting and <b>IntelliSense</b>, guaranteeing that code composition is both effortless and robust, aiding in easier maintenance and bug-free development.
+  The core <b>FsmRx</b> module is framework-agnostic and can be easily imported directly into your project as a standalone package or via framework-specific wrappers.</p>
+
+  <p>Building functionality into FSMs with <b>FsmRx</b> relies on four core concepts:</p>
+
+  <ul>
+    <li><b>State Information:</b> These objects describe the data and metadata associated with each state. 
+    This is comprised of the name of the state, its associated data, whether or not this data can be updated and a list of allowed states to transition to. 
+    State information is passed into all lifecycle hooks during transitions but can also be accessed at any time using the <code>currentState$</code> getter.
+    State information provides developers with real-time updates about the current status and functionalities of the FSM, facilitating the implementation of complex state logic.</li>
+    
+    <li><b>Allowlists:</b> Are used to guard the FSM from illegal state transitions adding structure and predictability. 
+    Each state specifies a list of potential states that it can transition to, called <code>canLeaveToStates</code>.
+    From this, a list of all the possible states it can have transitioned from is also derived, called <code>canEnterFromStates</code>.
+    Allowlists ensure the FSM is always behaving as intended leading to less error-prone applications.</li>
+
+    <li><b>Transitions</b>: These are when the state is mutated through the use of the <code>changeState</code> and <code>updateState</code> functions. 
+    These functions are supplied the applicable <code>stateData</code> for the desired state. 
+    While there are minor differences between the <code>changeState</code> and <code>updateState</code> state transitions, both follow the same pattern of checking that a transition is allowed before executing any provided lifecycle hooks callback functions. 
+    This is handled via an <b>RxJS</b> pipeline. Successful transitions can be subscribed to, via the <code>stateData$</code> property, for use with the angular <code> AsyncPipe</code> or for unit testing.
+    FSMs in <b>FsmRx</b> are self-recoverable. If an error is detected or a transition is cancelled via a callback function, it will always reset to the last valid state.</li>
+    
+    <li><b>Lifecycle Hooks</b>: Are callback functions invoked during the execution of a transition. 
+    For a <code>changeState</code> transition the <code>onLeave</code> and <code>onEnter</code> hooks are executed respectively, while for a <code>updateState</code> transition the <code>onUpdate</code> callback is called. </li>
+    These callbacks are supplied the state Information of both the current state and the desired new/updated state. 
+    They are designed for the implementation of any build-up and teardown logic of state-specific interactions, logic, or calls. 
+  </ul>
+
+  <p>These tenants provide the basic building blocks required for any FSM and will be discussed in greater detail in subsequent articles. </p>
+
+  <hr />
+  
+  <p>Now that you have a good understanding of FSMs and the problems they are designed to solve, it is time to look at how <b>FsmRx</b> can be used to build FSM Angular components.
+  ["Part 2: Creating a simple traffic light component with FsmRx"](?path=/docs/2-creating-a-simple-traffic-light-component-with-fsmrx--docs) will demonstration how to create a simple traffic light component using <b>FsmRx</b>.</p>
+
+
+</article>
+
+<style>
+  {`
+    h2{
+      border-bottom:none !important;
+    }
+
+    h3, h4{
+      text-align: center;
+      text-decoration:underline;
+    }
+
+    h4{
+      font-size: 20px !important;
+      margin: 16px 0 !important;
+    }
+
+
+    article p{
+      margin:10px;
+      font-size:16px!important;
+    }
+
+
+    sub{
+      line-height:0px;
+    }
+
+    img{
+      background-color:#fff;
+    }
+
+    ol, ul{
+      margin:0px 40px!important;
+    }
+
+    ol li,
+    ul li{
+      font-size:16px !important;
+    }
+
+    figure{
+        display:flex;
+        justify-content: center;
+        position:relative;
+        text-align: center; 
+        margin: 30px auto; 
+    }
+    
+    figure div{
+      display:flex;
+      position:relative;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
+    figure figcaption {
+        position:absolute;
+        bottom:0px;
+        left: 0px;
+        right: 0px;
+        padding: 10px 20px;
+        background: rgba(0,0,0,0.65);
+        color:white;
+        font-size:14px;
+    }
+
+   
+    .breakout-box{
+      border: 2px solid #000; 
+      background-color: #dbe5f0;
+      border-radius: 5px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      margin: 30px 100px;
+      overflow:hidden;
+    }
+
+    .breakout-box > * {
+      padding:0px 20px;
+    }
+
+    .breakout-box h3{
+      position:relative;
+      color:white;
+      padding: 10px 20px!important;
+      border-bottom: 1px solid #000;
+      margin:0px;
+      text-align: left;
+      background-color: #4f81bd;
+    }
+
+    .columns{
+      display:flex;
+      gap: 20px;
+    }
+
+    .breakout-box .columns{
+      align-items: center;
+    }
+
+    .columns figure{
+      flex: 0 0 auto;
+      margin: 0px;
+    }
+
+    .breakout-box ol,
+    .breakout-box ul{
+      margin: 16px 40px 22px!important;
+    }
+
+    .breakout-box .docblock-source{
+      margin:25px 20px 40px;
+    }
+
+    .breakout-box.examples{
+      margin:30px auto;
+      width: fit-content;
+    }
+
+    .breakout-box.examples p{
+      display: inline-block;
+      text-align: center;
+    }
+
+  `}
+</style>

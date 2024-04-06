@@ -1,0 +1,15 @@
+<ng-container *ngIf="stateData$ | async as stateData">
+    <div class="content"
+        *ngIf="stateData.state !== 'FSMInit'">
+        <span class="walk-display"
+            [ngClass]="{'on': stateData.isWalkLightOn}">
+            <p>Walk</p>
+        </span>
+        <div class="interface">
+            <span class="walk-requested-indicator"
+                [ngClass]="{'on': stateData.isWalkRequestIndicatorOn}"></span>
+            <button class="walk-button"
+                (click)="handleWalkButtonClicked()"> </button>
+        </div>
+    </div>
+</ng-container>

@@ -1,0 +1,24 @@
+{
+  "name": "ngx-fsm-rx-examples",
+  "version": "1.0.0",
+  "description": "Deep dive articles and Angular examples of NgxFsmRx, a Finite State Machine built upon RxJS and Typescript.",
+  "keywords": [
+    "Typescript",
+    "RxJS",
+    "FSM",
+    "Compodoc",
+    "Angular",
+    "Storybook",
+    "Mermaid"
+  ],
+  "author": "Chris Gregory",
+  "license": "ISC",
+  "peerDependencies": {
+    "@angular/common": "^16.2.0",
+    "@angular/core": "^16.2.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
