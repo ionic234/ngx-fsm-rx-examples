@@ -6,7 +6,6 @@ import fooOrBarTypeNarrowingIfExample from "./assets/part4/foo-or-bar-type-narro
 import fooOrBarTypeNarrowingSwitchExample from "./assets/part4/foo-or-bar-type-narrowing-switch-example.png";
 import assertCannotReach from "./assets/part4/assert-cannot-reach.png";
 import CrossingControlBoxComponent from "./assets/part4/crossing-control-component.png"
-
 import trafficLightRequestCrossingStateDiagram from "./assets/part4/traffic-light-request-crossing-state-diagram.svg"
 import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-type-narrowing.png"
 
@@ -86,8 +85,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <p>The rendered component and its state diagram appear as follows:</p>
 
   <figure>
-    <div>
-      <img src={CrossingControlBoxComponent} alt=" Crossing Control Component and State Diagram." style={{ paddingBottom: '60px' }} />
+    <div class = "figure-content">
+      <img src={CrossingControlBoxComponent} alt=" Crossing Control Component and State Diagram."/>
       <figcaption>The rendered CrossingControlBoxComponent and its state diagram.</figcaption>
     </div>
   </figure>
@@ -119,8 +118,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     <p>Type narrowing is the process by which the <b>TypeScript</b> compiler uses control flow analysis to narrow down the type of a union variable based on checks and conditions inside a given code block. For example:</p>
     
     <figure>
-      <div>
-        <img src={fooOrBarTypeNarrowingIfExample} alt="Foo or Bar Type Narrowing If example" style={{ paddingBottom: '58px' }} />
+      <div class = "figure-content">
+        <img src={fooOrBarTypeNarrowingIfExample} alt="Foo or Bar Type Narrowing If example" />
         <figcaption>In this example, the type of the <code>fooOrBar</code> property is inferred using equality type narrowing via the if statement conditional.</figcaption>
       </div>
     </figure>
@@ -132,8 +131,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     occurs because the default clause of an exhaustive switch is unreachable.</p>
 
     <figure>
-      <div>
-        <img src={fooOrBarTypeNarrowingSwitchExample} alt="Foo or Bar Type Narrowing Switch example" style={{ paddingBottom: '58px' }} />
+      <div class = "figure-content">
+        <img src={fooOrBarTypeNarrowingSwitchExample} alt="Foo or Bar Type Narrowing Switch example" />
         <figcaption>In this example, the type of the <code>fooOrBar</code> property is inferred using type narrowing based on the switch statement cases.</figcaption>
       </div>
     </figure>
@@ -145,8 +144,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     <p>For example, if a third type called <code>"baz"</code> were added to the state union without updating the switch statement, the following error would occur:</p> 
 
     <figure>
-      <div>
-        <img src={assertCannotReach} alt="Exhaustive switch with assert cannot reach error" style={{ paddingBottom: '39px' }} />
+      <div class = "figure-content">
+        <img src={assertCannotReach} alt="Exhaustive switch with assert cannot reach error" />
         <figcaption>The error thrown by <code>assertCannotReach</code> when it is reachable.</figcaption>
       </div>
     </figure>
@@ -215,8 +214,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     <p>Using type narrowing on discriminated unions enhances type safety and code hinting: </p>
 
     <figure>
-      <div>
-        <img src={discriminatedUnionTypeNarrowing} alt="Type narrowing with FsmRx" style={{ paddingBottom: '39px' }} />
+      <div class = "figure-content">
+        <img src={discriminatedUnionTypeNarrowing} alt="Type narrowing with FsmRx" />
         <figcaption> Discriminant-based state narrowing inside an exhaustive switch.</figcaption>
       </div>
     </figure>
@@ -438,8 +437,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
   <p>This behavior is demonstrated in the following state diagram: </p>
 
   <figure>
-    <div>
-      <img src={trafficLightRequestCrossingStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 20px 89px 10px', width: '470px' }} />
+    <div class = "figure-content">
+      <img src={trafficLightRequestCrossingStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 20px 8px 10px', width: '470px' }} />
       <figcaption>The state diagram showing the branching behavior of the <b>TrafficLightRequestCrossingComponent</b> resulting from the checks perfomed when leaving the <b>"prepareToStop"</b> state.</figcaption>
     </div>
   </figure>
@@ -523,7 +522,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     
     <p>For the simple traffic light state diagram the template string and the rendered diagram are as follows:</p>
 
-    <div class="columns">
+    <div class="columns docblock">
       ```
       `stateDiagram-v2
       direction TB
@@ -537,7 +536,7 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
       ```  
       <figure>
-        <div>
+        <div class = "figure-content">
           <img src={simpleTrafficLightStateDiagram} alt="Simple Traffic Light State Diagram" style={{ padding: '10px 20px 10px 10px', width: '170px' }} />
         </div>
       </figure>  
@@ -576,8 +575,8 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     Within this transition, the application evaluates the boolean variable <b>pedestrianCrossingRequested.</b> If the value is true, it proceeds to the <b>"stop_startWalking"</b> state; otherwise, it enters the <b>"stop"</b> state.</p>
     
     <figure>
-      <div>
-        <img src={trafficLightRequestCrossingStateDiagramExtract} alt="Extract from the TrafficLightRequestCrossing component state diagram" style={{ paddingBottom: '60px' }} />
+      <div class = "figure-content">
+        <img src={trafficLightRequestCrossingStateDiagramExtract} alt="Extract from the TrafficLightRequestCrossing component state diagram" />
         <figcaption>The "choice" node of the TrafficLightRequestCrossing components state diagram.</figcaption>
       </div>
     </figure>
@@ -738,37 +737,52 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
     }
 
     figure{
-        display:flex;
-        justify-content: center;
-        position:relative;
-        text-align: center; 
-        margin: 30px auto; 
-    }
-    
-    figure div{
       display:flex;
-      position:relative;
-      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      justify-content:center;
+      margin: 30px auto; 
+      margin: 30px auto;
     }
 
-    figure figcaption {
-        position:absolute;
-        bottom:0px;
-        left: 0px;
-        right: 0px;
+    figure .figure-content{
+      display:table;
+      position: relative;
+    }
+
+    figure .figure-content:before{
+      content: "";
+      display:block;
+      position:absolute; 
+      top:0px;
+      left:0px;
+      width:100%;
+      height:100%;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      background-color:white;
+    }
+
+    figure img{
+      position:relative;
+      display: block;
+    }
+
+    figcaption {
+        position:relative;
+        z-index:1;
+        display: table-caption;
+        caption-side: bottom;
         padding: 10px 20px;
-        background: rgba(0,0,0,0.65);
         color:white;
         font-size:14px;
+        background: rgba(0,0,0,0.65);
+        text-align:center;
     }
 
-   
     .breakout-box{
       border: 2px solid #000; 
       background-color: #dbe5f0;
       border-radius: 5px;
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      margin: 30px 100px;
+      margin: 30px 0px;
       overflow:hidden;
     }
 
@@ -788,16 +802,29 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
 
     .columns{
       display:flex;
-      gap: 20px;
+      flex-direction: column;
     }
 
     .breakout-box .columns{
       align-items: center;
+      justify-content: center;
     }
 
     .columns figure{
       flex: 0 0 auto;
-      margin: 0px;
+      margin: 20px 0px;
+    }
+  
+    .columns .column-text{
+      margin:16px 0px;
+    }
+
+    .columns .column-text p:first-of-type {
+      margin-top:0px;
+    }
+
+    .columns .column-text p:last-of-type {
+      margin-bottom:0px;
     }
 
     .breakout-box ol,
@@ -809,6 +836,10 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
       margin:25px 20px 40px;
     }
 
+    .breakout-box .columns.docblock .docblock-source{
+      margin:20px 0px;
+    }
+
     .breakout-box.examples{
       margin:30px auto;
       width: fit-content;
@@ -818,6 +849,32 @@ import discriminatedUnionTypeNarrowing from "./assets/part4/discriminated-union-
       display: inline-block;
       text-align: center;
     }
-    
+
+    @media screen and (min-width: 768px) {
+      .columns{
+        flex-direction: row;
+        gap: 20px;
+      }
+      .columns.docblock{
+        gap:40px;
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      .columns > *:not(:last-child){
+        margin-bottom: 0px;
+      }
+      .columns.docblock{
+        align-items:normal;
+      }
+    }
+
+  
+    @media screen and (min-width: 1024px) {
+      .breakout-box{
+        margin: 30px 100px;
+      }
+    }
+
   `}
 </style>

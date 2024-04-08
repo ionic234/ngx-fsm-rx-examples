@@ -25,13 +25,15 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
   <div className="breakout-box">
     <h3>The Three States of Water example</h3>
     <div class="columns">
+      
       <figure>
-        <div>
-          <img src={statesOfWater} alt="Three States of Water" style={{ paddingBottom: '40px', width: '330px' }} />
+        <div class = "figure-content">
+          <img src={statesOfWater} alt="Three States of Water" style={{ width: '330px' }} />
           <figcaption> The Three States of Water Infographic. <br/> Web Reference: https://earthhow.com/states-of-water/</figcaption>
         </div>
       </figure>
-      <div>
+
+      <div class = "column-text">
         <p>In this well known example H<sub>2</sub>O can exist in three distinct states: <b>"solid"</b>(ice), <b>"liquid"</b>(water) and <b>"gas"</b>(steam). It is also possible to transition between these states by applying or removing heat/pressure.</p>
         <p>FSMs function similarly by defining a limited set of states a system can be in and the rules that govern transitions between these states. Transitions usually occur due to user input or as a result of processing/fetching of data.</p>
         <p>This example demonstrates the core principles of FSMs in an easy-to-digest way that should be familiar to most people. This familiarity creates shared understanding/language between developers, designers and stakeholders allowing for greater cross-discipline collaboration.</p>
@@ -50,10 +52,10 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
   
   <p>These properties imply the existence of two informal states, an <b>"awaitingInput"</b> state and an <b>"error"</b> state. When both properties are false it is implied that the application is in an <b>"awaitingInput"</b> state and when both are true it is in an <b>"error"</b> state.
   It is also possible to transition back and forth between these two states by setting these properties to their corresponding values.</p>
-  
+
   <figure>
-    <div>
-      <img src={formStatesExpected} alt="Diagram of expected implied states" style={{ paddingBottom: '45px' }} />
+    <div class = "figure-content">
+      <img src={formStatesExpected} alt="Diagram of expected implied states" style={{ paddingBottom: '3px' }}/>
       <figcaption>A diagram showing the expected implied states and transitions of the form example.</figcaption>
     </div>
   </figure>
@@ -71,8 +73,8 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
   Conversely, if <code>isError</code> was true while <code>submitButtonDisabled</code> was false, the user could submit their data despite the form showing errors.</p> 
   
   <figure>
-    <div>
-      <img src={formStatesActual} alt="Diagram of expected implied states" style={{ paddingBottom: '45px' }} />
+    <div class = "figure-content">
+      <img src={formStatesActual} alt="Diagram of expected implied states" style={{ paddingBottom: '6px' }} />
       <figcaption>A diagram showing the actual implied states and transitions of the form example.</figcaption>
     </div>
   </figure>
@@ -100,15 +102,15 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
   <div className="breakout-box">
     <h3>Traffic Light FSM example</h3>
     <div class="columns">
-      <div>
+      <div class = "column-text">
         <p>A familiar real-world example of an FSM is a traffic light. A standard traffic light has three lights, a green light, an orange light and a red light. These lights control the flow of traffic by signalling to drivers when it is safe to proceed.</p>
         <p>When represented in an FSM, traffic lights (in Australia) have three states. A <b>"go"</b> state (green), a <b>"prepareToStop"</b> state (orange) and a <b>"stop"</b> state (red).
         The traffic light can't be in two states at once and the sequence of state transitions is well-defined and predictable: <b>"go"</b> will always transition to <b>"prepareToStop"</b>, <b>"prepareToStop"</b> will always transition to <b>"stop"</b> and <b>"stop"</b> will always return to <b>"go"</b>.</p>
         <p>The formal structure of FSMs ensures these rules are always followed as the consequences of transitioning to the wrong state at the wrong time could be catastrophic.</p>
       </div>
       <figure>
-        <div>
-          <img src={trafficLightStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '10px 20px 80px 10px', width: '230px' }} />
+        <div class = "figure-content">
+          <img src={trafficLightStateDiagram} alt="Traffic Light State Diagram" style={{ padding: '0px 20px 5px 10px', width: '230px' }} />
           <figcaption>A state diagram showing the states and transitions of a standard traffic light.</figcaption>
         </div>
       </figure>
@@ -168,7 +170,7 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
     <li><b>Lifecycle Hooks</b>: Are callback functions invoked during the execution of a transition. 
     For a <code>changeState</code> transition the <code>onLeave</code> and <code>onEnter</code> hooks are executed respectively, while for a <code>updateState</code> transition the <code>onUpdate</code> callback is called. </li>
     These callbacks are supplied the state Information of both the current state and the desired new/updated state. 
-    They are designed for the implementation of any build-up and teardown logic of state-specific interactions, logic, or calls. 
+    They are designed for the implementation of any build-up and teardown of state-specific interactions, logic, or calls. 
   </ul>
 
   <p>These tenants provide the basic building blocks required for any FSM and will be discussed in greater detail in subsequent articles. </p>
@@ -222,37 +224,52 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
     }
 
     figure{
-        display:flex;
-        justify-content: center;
-        position:relative;
-        text-align: center; 
-        margin: 30px auto; 
-    }
-    
-    figure div{
       display:flex;
-      position:relative;
-      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      justify-content:center;
+      margin: 30px auto; 
+      margin: 30px auto;
     }
 
-    figure figcaption {
-        position:absolute;
-        bottom:0px;
-        left: 0px;
-        right: 0px;
+    figure .figure-content{
+      display:table;
+      position: relative;
+    }
+
+    figure .figure-content:before{
+      content: "";
+      display:block;
+      position:absolute; 
+      top:0px;
+      left:0px;
+      width:100%;
+      height:100%;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+      background-color:white;
+    }
+
+    figure img{
+      position:relative;
+      display: block;
+    }
+
+    figcaption {
+        position:relative;
+        z-index:1;
+        display: table-caption;
+        caption-side: bottom;
         padding: 10px 20px;
-        background: rgba(0,0,0,0.65);
         color:white;
         font-size:14px;
+        background: rgba(0,0,0,0.65);
+        text-align:center;
     }
 
-   
     .breakout-box{
       border: 2px solid #000; 
       background-color: #dbe5f0;
       border-radius: 5px;
       box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-      margin: 30px 100px;
+      margin: 30px 0px;
       overflow:hidden;
     }
 
@@ -272,16 +289,29 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
 
     .columns{
       display:flex;
-      gap: 20px;
+      flex-direction: column;
     }
 
     .breakout-box .columns{
       align-items: center;
+      justify-content: center;
     }
 
     .columns figure{
       flex: 0 0 auto;
-      margin: 0px;
+      margin: 20px 0px;
+    }
+  
+    .columns .column-text{
+      margin:16px 0px;
+    }
+
+    .columns .column-text p:first-of-type {
+      margin-top:0px;
+    }
+
+    .columns .column-text p:last-of-type {
+      margin-bottom:0px;
     }
 
     .breakout-box ol,
@@ -293,6 +323,10 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
       margin:25px 20px 40px;
     }
 
+    .breakout-box .columns.docblock .docblock-source{
+      margin:20px 0px;
+    }
+
     .breakout-box.examples{
       margin:30px auto;
       width: fit-content;
@@ -301,6 +335,32 @@ import { TableOfContents } from '@storybook/addon-docs/blocks';
     .breakout-box.examples p{
       display: inline-block;
       text-align: center;
+    }
+
+    @media screen and (min-width: 768px) {
+      .columns{
+        flex-direction: row;
+        gap: 20px;
+      }
+      .columns.docblock{
+        gap:40px;
+      }
+    }
+
+    @media screen and (max-width: 767px) {
+      .columns > *:not(:last-child){
+        margin-bottom: 0px;
+      }
+      .columns.docblock{
+        align-items:normal;
+      }
+    }
+
+  
+    @media screen and (min-width: 1024px) {
+      .breakout-box{
+        margin: 30px 100px;
+      }
     }
 
   `}
