@@ -1,6 +1,6 @@
 {
   "name": "ngx-fsm-rx-examples",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deep dive articles and Angular examples of NgxFsmRx, a Finite State Machine built upon RxJS and Typescript.",
   "keywords": [
     "Typescript",
